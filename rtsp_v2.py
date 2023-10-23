@@ -5,6 +5,7 @@ import argparse
 import subprocess
 import time
 import sys
+import libraries.sendKeyboardMouse
 
 # Michael was here
 
@@ -12,8 +13,6 @@ import sys
 # Refer to the library documentation online
 
 rtsp = Flask(__name__)
-
-ENABLE_DEBUG = False
 
 device = "video0"
 width = 1280
@@ -50,155 +49,6 @@ MISC_CODES = {
     'poweroff': 'python3 power_off.py'
 }
 
-# Initialize Keyboard Dictionary
-KEY_CODES = {
-'Alt': 2,
-'Backspace': 4,
-'Control': 6,
-'Delete': 8,
-'ArrowDown': 10,
-'End': 12,
-'Enter': 14,
-'Escape': 16,
-'F1': 18,
-'F2': 20,
-'F3': 22,
-'F4': 24,
-'F5': 26,
-'F6': 28,
-'F7': 30,
-'F8': 32,
-'F9': 34,
-'F10': 36,
-'F11': 38,
-'F12': 40,
-'Home': 42,
-'ArrowLeft': 44,
-'PageDown': 46,
-'PageUp': 48,
-'ArrowRight': 50,
-'Shift': 52,
-' ': 54,
-'Tab': 56,
-'ArrowUp': 58,
-#'AltRight': 60,
-#'ControlRight': 62,
-'OS': 64,
-'Meta': 64,
-#'OSRight': 66,
-'a': 68,
-'A': 68,
-'b': 70,
-'B': 70,
-'c': 72,
-'C': 72,
-'d': 74,
-'D': 74,
-'e': 76,
-'E': 76,
-'f': 78,
-'F': 78,
-'g': 80,
-'G': 80,
-'h': 82,
-'H': 82,
-'i': 84,
-'I': 84,
-'j': 86,
-'J': 86,
-'k': 88,
-'K': 88,
-'l': 90,
-'L': 90,
-'m': 92,
-'M': 92,
-'n': 94,
-'N': 94,
-'o': 96,
-'O': 96,
-'p': 98,
-'P': 98,
-'q': 100,
-'Q': 100,
-'r': 102,
-'R': 102,
-'s': 104,
-'S': 104,
-'t': 106,
-'T': 106,
-'u': 108,
-'U': 108,
-'v': 110,
-'V': 110,
-'w': 112,
-'W': 112,
-'x': 114,
-'X': 114,
-'y': 116,
-'Y': 116,
-'z': 118,
-'Z': 118,
-'`': 120,
-'~': 120,
-'1': 122,
-'!': 122,
-'2': 124,
-'@': 124,
-'3': 126,
-'#': 126,
-'4': 128,
-'$': 128,
-'5': 130,
-'%': 130,
-'6': 132,
-'^': 132,
-'7': 134,
-'&': 134,
-'8': 136,
-'*': 136,
-'9': 138,
-'(': 138,
-'0': 140,
-')': 140,
-'-': 142,
-'_': 142,
-'=': 144,
-'+': 144,
-'[': 146,
-'{': 146,
-']': 148,
-'}': 148,
-'\\': 150,
-'|': 150,
-'CapsLock': 152,
-';': 154,
-':': 154,
-'\'': 156,
-'\"': 156,
-',': 158,
-'<': 158,
-'.': 160,
-'>': 160,
-'/': 162,
-'?': 162,
-'Insert': 164,
-'F13': 166,
-'F14': 168,
-'F15': 170,
-'F16': 172,
-'F17': 174,
-'F18': 176,
-'F19': 178,
-'F20': 180,
-#'ShiftRight': 182
-}
-
-# Initialize Mouse Dictionary
-MOUSE_CODES = {
-    "0": 0, # Left Click
-    "2": 2, # Right Click
-    "1": 4  # Scroll Click
-}
 
 
 
@@ -334,62 +184,6 @@ def getAudioInputDevice():
     for i in range(0, numdevices):
         if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
             print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
-
-
-def sendKeyboardMouseAction(in_type, key, mouseX, mouseY):
-    global ENABLE_DEBUG
-    i2c_command_start = "i2ctransfer -y"
-    if ENABLE_DEBUG:
-        i2c_command_start += " -v"
-    i2c_command_start += " 0 w"
-    data_len = 0
-
-    if (in_type == 'keydown' or in_type == 'keyup'): # Keyboard down/up
-        # val1 = isPressed, val2 = key_pressed
-        data_len = 2
-        key_code = KEY_CODES.get(str(key))
-        if in_type == 'keydown':
-            key_code += 1
-        data_hex = " 0x01 " + hex(key_code)
-
-    elif (in_type == 'mousemove'): # Mouse Move
-        # val1 = mouse_x, val2 = mouse_y
-        data_len = 3
-        # abs() to prevent negative bits from passing to kernel
-        data_hex = " 0x02 " + hex(abs(int_to_2sComp(int(mouseX)))) + " " + hex(abs(int_to_2sComp(int(mouseY))))
-
-    elif (in_type == 'mousedown' or in_type == 'mouseup'): # Mouse Buttons
-        # val1 = isPressed, val2 = button
-        data_len = 2
-        key_code = MOUSE_CODES.get(str(key))
-        if in_type == 'mousedown':
-            key_code += 1
-        data_hex = " 0x03 " + hex(key_code)
-
-    elif (in_type == 'mousescroll'): # Mouse Scroll
-         # val1 = scroll_x, val2 = scroll_y
-        data_len = 3
-        data_hex = " 0x04 " + hex(abs(int_to_2sComp(int(mouseX)))) + " " + hex(abs(int(int_to_2sComp(mouseY))))
-
-    else:
-        print("Error: Improper command sent, ignored.")
-
-    # Send command to I2C
-    # Build I2C transfer line
-    if data_len != 0 and START_ADDRESS > 0:
-        i2c_command = i2c_command_start + str(data_len) + "@" + hex(START_ADDRESS) + data_hex
-        subprocess.run(i2c_command, shell=True)
-
-
-def int_to_2sComp(num):
-    if num < -128:
-        return 0
-    elif num > 127:
-        return 255
-    elif num >= 0:
-        return num
-    return (1 << 8) + num
-
 
 def sendMiscAction(key):
     command = MISC_CODES.get(key)
