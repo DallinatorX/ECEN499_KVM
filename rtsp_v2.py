@@ -5,11 +5,8 @@ import argparse
 import subprocess
 import time
 import sys
-#from ./libraries/sendKeyboardMouse import *
 
-import libraries.sendKeyboardMouse
-
-# Michael was here
+from libraries.sendKeyboardMouse import *
 
 # Questions regarding Flask or other libraries?
 # Refer to the library documentation online
@@ -32,9 +29,7 @@ AUDIO_DEVICE = 0
 FORMAT = pyaudio.paInt16
 CHANNELS = 2
 RATE = 44100
-ROPEN = True # From an online example
-# CHUNK = 1024
-CHUNK = int(RATE/20) # From online example
+CHUNK = 1024
 RECORD_SECONDS = 5
 BITS_PER_SAMPLE = 16
 audio1 = pyaudio.PyAudio()
