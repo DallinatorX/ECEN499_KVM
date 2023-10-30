@@ -2,16 +2,17 @@
 import serial
 import time
 
+
 # Initialize Keyboard Dictionary
 KEY_CODES = {   
-'Alt': 2,
-'Backspace': 4,
-'Control': 6,
-'Delete': 8,
-'ArrowDown': 10,
-'End': 12,
-'Enter': 14,
-'Escape': 16,
+'alt': 2,
+'backspace': 4,
+'control': 6,
+'delete': 8,
+'arrowDown': 10,
+'end': 12,
+'enter': 14,
+'escape': 16,
 'F1': 18,
 'F2': 20,
 'F3': 22,
@@ -29,8 +30,8 @@ KEY_CODES = {
 'PageDown': 46,
 'PageUp': 48,
 'ArrowRight': 50,
-'Shift': 52,
-' ': 54,
+'shift': 52,
+'space': 54,
 'Tab': 56,
 'ArrowUp': 58,
 #'AltRight': 60,
@@ -188,17 +189,17 @@ def sendKeyboardMouseAction(in_type, key, mouseX, mouseY, serial_input):
         data_hex = "\x01" +  chr(key_code)
 
     elif (in_type == 'mousemove'): # Mouse Move
-        # abs() to prevent negative bits from passing
-        data_hex = " 0x02 " + hex(abs(int_to_2sComp(int(mouseX)))) + " " + hex(abs(int_to_2sComp(int(mouseY))))
+            # abs() to prevent negative bits from passing
+            data_hex = "\x02" + chr(abs(int_to_2sComp(int(mouseX)))) + chr(abs(int_to_2sComp(int(mouseY))))
 
     elif (in_type == 'mousedown' or in_type == 'mouseup'): # Mouse Buttons
         key_code = MOUSE_CODES.get(str(key))
         if in_type == 'mousedown':
             key_code += 1
-        data_hex = " 0x03 " + hex(key_code)
+        data_hex = "\x03" + hex(key_code)
 
     elif (in_type == 'mousescroll'): # Mouse Scroll
-        data_hex = " 0x04 " + hex(abs(int_to_2sComp(int(mouseX)))) + " " + hex(abs(int(int_to_2sComp(mouseY))))
+        data_hex = "\x04" + hex(abs(int_to_2sComp(int(mouseX)))) + hex(abs(int_to_2sComp(int(mouseY))))
 
     else:
         print("Error: Improper command sent, ignored.")
