@@ -4,7 +4,7 @@ from pynput.keyboard import Key, Listener
 
 # Keep track of keys that are currently held down
 current_keys = set()
-ser1 = serial.Serial("/dev/ttyACM2",9600)
+ser1 = serial.Serial("/dev/ttyACM0",9600)
 
 
 # Define functions for keypress and key release events

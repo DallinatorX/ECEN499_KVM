@@ -5,7 +5,7 @@ import time
 # Initialize Keyboard Dictionary
 KEY_CODES = {   
 'Alt': 2,
-'Backspace': 4,
+'backspace': 4,
 'Control': 6,
 'Delete': 8,
 'ArrowDown': 10,
@@ -29,7 +29,7 @@ KEY_CODES = {
 'PageDown': 46,
 'PageUp': 48,
 'ArrowRight': 50,
-'Shift': 52,
+'shift_r': 52,
 'space': 54,
 'Tab': 56,
 'ArrowUp': 58,
