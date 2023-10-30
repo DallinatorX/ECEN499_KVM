@@ -189,20 +189,84 @@ def sendKeyboardMouseAction(in_type, key, mouseX, mouseY, serial_input):
 
     elif (in_type == 'mousemove'): # Mouse Move
         # abs() to prevent negative bits from passing
-        data_hex = " 0x02 " + hex(abs(int_to_2sComp(int(mouseX)))) + " " + hex(abs(int_to_2sComp(int(mouseY))))
+        data_hex = "\x02" + chr(abs(int_to_2sComp(int(mouseX)))) + chr(abs(int_to_2sComp(int(mouseY))))
 
     elif (in_type == 'mousedown' or in_type == 'mouseup'): # Mouse Buttons
         key_code = MOUSE_CODES.get(str(key))
         if in_type == 'mousedown':
             key_code += 1
-        data_hex = " 0x03 " + hex(key_code)
+        data_hex = "\x03" + hex(key_code)
 
     elif (in_type == 'mousescroll'): # Mouse Scroll
-        data_hex = " 0x04 " + hex(abs(int_to_2sComp(int(mouseX)))) + " " + hex(abs(int(int_to_2sComp(mouseY))))
-
+        data_hex = "\x04" + hex(abs(int_to_2sComp(int(mouseX)))) + hex(abs(int_to_2sComp(int(mouseY))))
+    
     else:
         print("Error: Improper command sent, ignored.")
 
     serial_input.write(data_hex.encode())
     
     print(data_hex)
+
+import pygame
+from pygame.locals import *
+
+# Initialize Pygame
+pygame.init()
+
+# Set screen dimensions
+screen_width, screen_height = 1920, 1080
+screen = pygame.display.set_mode((screen_width, screen_height))
+pygame.mouse.set_visible(False)
+
+# Set the initial camera position
+camera_x, camera_y = 0, 0
+
+# Set the initial mouse position to the center of the screen
+pygame.mouse.set_pos(screen_width // 2, screen_height // 2)
+
+# Create a clock object to control the frame rate
+clock = pygame.time.Clock()
+
+running = True
+
+this = 0
+
+while running:
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            running = False
+    
+
+    # Get the relative mouse movement
+    mouse_dx, mouse_dy = pygame.mouse.get_rel()
+    
+    sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy)
+    if this == 1:
+        print(mouse_dx,mouse_dy)
+    else:
+        if this == 100:
+            this = 0
+    this += 1
+    
+
+    # Update the camera position based on mouse movement
+    camera_x += mouse_dx
+    camera_y += mouse_dy
+
+    # Clear the screen
+    screen.fill((0, 0, 0))
+
+    # Draw the world with the camera offset
+    # Replace this with your game graphics or rendering logic
+    pygame.draw.rect(screen, (255, 0, 0), (200 - camera_x, 200 - camera_y, 50, 50))
+
+    # Update the display
+    pygame.display.flip()
+
+    # Center the mouse position
+    pygame.mouse.set_pos(screen_width // 2, screen_height // 2)
+
+    # Limit frame rate to 60 FPS
+    clock.tick(60)
+
+pygame.quit()
