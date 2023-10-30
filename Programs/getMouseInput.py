@@ -1,6 +1,9 @@
 import pygame
 from pygame.locals import *
-from ..libraries.sendKeyboardMouse import *
+from libraries.sendKeyboardMouse import *
+import serial
+
+serial_input = serial.Serial("/dev/ttyACM0",9600)
 
 # Initialize Pygame
 pygame.init()
@@ -32,7 +35,7 @@ while running:
     # Get the relative mouse movement
     mouse_dx, mouse_dy = pygame.mouse.get_rel()
     
-    sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy)
+    sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
     if this == 1:
         print(mouse_dx,mouse_dy)
     else:

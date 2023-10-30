@@ -2,16 +2,17 @@
 import serial
 import time
 
+
 # Initialize Keyboard Dictionary
 KEY_CODES = {   
-'Alt': 2,
-'Backspace': 4,
-'Control': 6,
-'Delete': 8,
-'ArrowDown': 10,
-'End': 12,
-'Enter': 14,
-'Escape': 16,
+'alt': 2,
+'backspace': 4,
+'control': 6,
+'delete': 8,
+'arrowDown': 10,
+'end': 12,
+'enter': 14,
+'escape': 16,
 'F1': 18,
 'F2': 20,
 'F3': 22,
@@ -29,8 +30,8 @@ KEY_CODES = {
 'PageDown': 46,
 'PageUp': 48,
 'ArrowRight': 50,
-'Shift': 52,
-' ': 54,
+'shift': 52,
+'space': 54,
 'Tab': 56,
 'ArrowUp': 58,
 #'AltRight': 60,
