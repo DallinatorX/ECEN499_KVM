@@ -188,17 +188,17 @@ def sendKeyboardMouseAction(in_type, key, mouseX, mouseY, serial_input):
         data_hex = "\x01" +  chr(key_code)
 
     elif (in_type == 'mousemove'): # Mouse Move
-        # abs() to prevent negative bits from passing
-        data_hex = " 0x02 " + hex(abs(int_to_2sComp(int(mouseX)))) + " " + hex(abs(int_to_2sComp(int(mouseY))))
+            # abs() to prevent negative bits from passing
+            data_hex = "\x02" + chr(abs(int_to_2sComp(int(mouseX)))) + chr(abs(int_to_2sComp(int(mouseY))))
 
     elif (in_type == 'mousedown' or in_type == 'mouseup'): # Mouse Buttons
         key_code = MOUSE_CODES.get(str(key))
         if in_type == 'mousedown':
             key_code += 1
-        data_hex = " 0x03 " + hex(key_code)
+        data_hex = "\x03" + hex(key_code)
 
     elif (in_type == 'mousescroll'): # Mouse Scroll
-        data_hex = " 0x04 " + hex(abs(int_to_2sComp(int(mouseX)))) + " " + hex(abs(int(int_to_2sComp(mouseY))))
+        data_hex = "\x04" + hex(abs(int_to_2sComp(int(mouseX)))) + hex(abs(int_to_2sComp(int(mouseY))))
 
     else:
         print("Error: Improper command sent, ignored.")
