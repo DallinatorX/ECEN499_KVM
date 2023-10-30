@@ -12,7 +12,6 @@
 
 byte key_array[200];
 uint8_t type_in, key_in, action;
-// char type_in, key_in, action;
 int8_t mouse_x, mouse_y, recieved_data;
 
 
@@ -204,21 +203,10 @@ void receiveEvent(int howMany)
     // Get Object Type
     action = 0;
     char test = Wire.read();
-    // char trash;
-    // trash = Wire.read();
-    // Wire.read();
 
     type_in = static_cast<uint8_t>(test); // receive byte
     Serial.print("I just got in unit_8: ");
     Serial.println(type_in);
-    // Serial.print("I just got in char: ");
-
-    // Serial.println(test);
-
-
-    // Print Serial Debug
-    //recieved_data = 1;
-
 
     // Keyboard Events
     if (type_in == 1) {
