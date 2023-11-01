@@ -26,13 +26,9 @@
   <style>
     body {
       padding: 25px;
-      background-color: white;  
-      color: black;
-      font-size: 25px;
-    }
-    .dark-mode {
-      background-color: black;
+      background-color: black;  
       color: white;
+      font-size: 25px;
     }
   </style>
 
@@ -80,9 +76,6 @@
       <!-- Toggle Host PC Power via external Python command-->
       <button id="executeFunction1">Power On/Off</button>
       <button id="openPopup">Force Shutdown</button>
-      
-      <!-- Darkmode -->
-      <button onclick="darkMode()">Darkmode</button>
       <!-- Add additional buttons here -->
 
     </div>
@@ -375,14 +368,6 @@
             sendEventAction(data);
             //alert("No don't turn me off :( ");
         }
-      }
-    </script>
- 
-    <!--Turn on/off darkmode-->
-    <script>
-      function darkMode() {
-        var element = document.body;
-        element.classList.toggle("dark-mode");
       }
     </script>
     
