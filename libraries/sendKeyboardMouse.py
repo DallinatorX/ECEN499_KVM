@@ -190,8 +190,8 @@ def sendKeyboardMouseAction(in_type, key, mouseX, mouseY, serial_input):
 
     elif (in_type == 'mousemove'): # Mouse Move
             # abs() to prevent negative bits from passing
-            data_hex = "\x02" + chr(abs(int_to_2sComp(int(mouseX)))) + chr(abs(int_to_2sComp(int(mouseY))))
-
+            # data_hex = "\x02" + chr(abs(int_to_2sComp(int(mouseX)))) + chr(abs(int_to_2sComp(int(mouseY))))
+            data_hex = "\x02" + chr(60+round(mouseX/5,0)) + chr(60+round(mouseY/5),0)
     elif (in_type == 'mousedown' or in_type == 'mouseup'): # Mouse Buttons
         key_code = MOUSE_CODES.get(str(key))
         if in_type == 'mousedown':
