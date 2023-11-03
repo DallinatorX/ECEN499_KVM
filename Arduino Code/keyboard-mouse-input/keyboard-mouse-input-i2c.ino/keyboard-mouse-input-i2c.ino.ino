@@ -12,8 +12,8 @@
 
 byte key_array[200];
 uint8_t type_in, key_in, action;
-int8_t mouse_x, mouse_y, recieved_data;
-
+// int8_t mouse_x, mouse_y, recieved_data;
+signed char mouse_x, mouse_y, recieved_data;
 
 void setup()
 {
@@ -190,7 +190,7 @@ void loop()
   key_in = 0;
   mouse_x = 0;
   mouse_y = 0;
-  delay(10);
+  delay(1);
 }
 
 
@@ -205,15 +205,13 @@ void receiveEvent(int howMany)
     char test = Wire.read();
 
     type_in = static_cast<uint8_t>(test); // receive byte
-    Serial.print("I just got in unit_8: ");
-    Serial.println(type_in);
+    recieved_data = 1;
+
 
     // Keyboard Events
     if (type_in == 1) {
       key_in = static_cast<uint8_t>(Wire.read());
       action = 2;
-      Serial.print("Key in is");
-      Serial.println(key_in);
 
       if (key_in & 0x01 == 1) { // If odd, Key is pressed
         action -= 1;
@@ -222,8 +220,8 @@ void receiveEvent(int howMany)
     }
     // Mouse Move Events
     else if (type_in == 2) {
-        mouse_x = Wire.read();
-        mouse_y = Wire.read();
+        mouse_x = Wire.read()-60;
+        mouse_y = Wire.read()-60;
         action = 3;
     }
     // Mouse Click Events
