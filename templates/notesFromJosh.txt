@@ -2,5 +2,5 @@ Things to do to the webpage interface:
 
 1. Dark mode always - DONE
 2. Make the frame size of the video picture fill the webpage area completely
-	3. Also add a bit of room for the options bar
+	3. Add key combination press to jump out of input control, and reveal overlay options
 4. Add a button or key combination for enter/exit full screen mode

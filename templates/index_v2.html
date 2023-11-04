@@ -6,9 +6,10 @@
  
   <style>
     #video-container {
-      width: 1280px;
-      height: 720px;
+      width: 100%; 
+      height: 100%;
     }
+    /*Gets rid of the margin on sides of video frame*/
     .container-fluid {
       margin-left: auto;
       margin-right: auto;
@@ -22,20 +23,21 @@
     }
   </style>
  
-  <!--Dark Mode Class (VERY IMPORTANT)-->
+  <!--Options Section of the UI-->
   <style>
     body {
-      padding: 25px;
+      padding: 0;
       background-color: black;  
       color: white;
       font-size: 25px;
+      visibility: visible;
     }
   </style>
 
   <!--Style for the Force Shutdown warning popup-->
   <style>
     /* CSS for the popup container */
-    .popup {
+    .popup1 {
         display: none;
         position: fixed;
         top: 0;
@@ -45,15 +47,40 @@
         background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
         z-index: 1;
     }
-    /* CSS for the popup content */
+
+    /* CSS for the popup container */
+    .popup2 {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        z-index: 2;
+    }
+
+    /* CSS Style for the popup overlay */
+    .overlay-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: black;
+        padding: 20px;
+        border: 3px solid green;
+        border-radius: 5px;
+    }
+    
+    /* CSS Style for the forceShutdown popup warning */
     .popup-content {
         position: absolute;
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        background-color: #fff;
+        background-color: black;
         padding: 20px;
-        border: 1px solid #ccc;
+        border: 3px solid green;
         border-radius: 5px;
     }
   </style>
@@ -68,24 +95,50 @@
     -->
     <p><center>( Press "Ctrl + Alt + End" to disable Mouse and Keyboard Input )</center></head>
     <div id="button-container">
-      <!-- Take Keyboard and Mouse -->
-      <button id="start-button" onclick="startListening()">Enable Mouse/Keyboard</button>
-      <!-- Turn on or off -->
-      <button id="power-button" onclick="KVM_on_off()">(Old)Power On</button>
-      
-      <!-- Toggle Host PC Power via external Python command-->
-      <button id="executeFunction1">Power On/Off</button>
-      <button id="openPopup">Force Shutdown</button>
+      <!-- <button id="openPopup">Force Shutdown</button> -->
+      <button id="openOverlay">Open Overlay</button>
       <!-- Add additional buttons here -->
 
     </div>
-    <!-- The popup warning for force shutdown -->
-    <div id="myPopup" class="popup">
+
+    <!-- The Overlay Popup -->
+    <div id="overlayPopup" class="popup1">
+      <div class="overlay-content">
+        <h2>Options</h2>
+        
+        <!-- Take Keyboard and Mouse -->
+        <button id="start-button" onclick="startListening()">Enable Mouse/Keyboard</button>
+        
+        <!-- Turn on or off -->
+        <button id="power-button" onclick="KVM_on_off()">(Old)Power On</button>
+        
+        <!-- Toggle Host PC Power via external Python command-->
+        <button id="openPopup1">Power On/Off</button>
+        
+        <!-- The popup warning for force shutdown -->
+        <button id="openPopup2">Force Shutdown</button>
+        
+        <button id="closeOverlay">Hide</button>
+      </div>
+    </div>
+
+    <!-- The popup warning for power button -->
+    <div id="noticePopup1" class="popup2">
       <div class="popup-content">
-        <h2>Force Shutdown?</h2>
-        <p>Proceeding will disconnect user from the gaming PC</p>
+        <h2>Power On/Off</h2>
+        <p>Are you sure you want to power on/off the gaming PC?</p>
+        <button id="executeFunction1">Proceed</button>
+        <button id="closePopup1">Close</button>
+      </div>
+    </div>
+
+    <!-- The popup warning for forceShutdown -->
+    <div id="noticePopup2" class="popup2">
+      <div class="popup-content">
+        <h2>Force Shutdown</h2>
+        <p>Are you sure you want to force shutdown the gaming PC?</p>
         <button id="executeFunction2">Proceed</button>
-        <button id="closePopup">Exit</button>
+        <button id="closePopup2">Close</button>
       </div>
     </div>
 
@@ -234,6 +287,10 @@
             if (event.ctrlKey && event.altKey && event.key === "End") {
               stopListening();
             }
+            // Open up the Overlay Again!
+            if (event.ctrlKey && event.altKey && event.key === "1") {
+              document.getElementById("overlayPopup").style.display = "block";
+            }
           }
         }
 
@@ -355,19 +412,19 @@
             "deltaX": "none",
             "deltaY": "none"
         };  
-        const powerButton = document.getElementById("power-button");
-        if (powerButton.innerText === "Power On") {
-            data.button = "poweron";
-            powerButton.innerHTML = "Power Off";
-            sendEventAction(data);
-            //alert("You're gonna turn me on!");
-        }
-        else {
-            data.button = "poweroff";
-            powerButton.innerHTML = "Power On";
-            sendEventAction(data);
-            //alert("No don't turn me off :( ");
-        }
+        // const powerButton = document.getElementById("power-button");
+        // if (powerButton.innerText === "Power On") {
+        //     data.button = "poweron";
+        //     powerButton.innerHTML = "Power Off";
+        //     sendEventAction(data);
+        //     //alert("You're gonna turn me on!");
+        // }
+        // else {
+        //     data.button = "poweroff";
+        //     powerButton.innerHTML = "Power On";
+        //     sendEventAction(data);
+        //     //alert("No don't turn me off :( ");
+        // }
       }
     </script>
     
@@ -383,6 +440,16 @@
                 // Handle the response from the server
                 console.log(data);  // You can display the result in the console or update your HTML page as needed
             });
+
+            const powerButton = document.getElementById("openPopup1");
+            if (powerButton.innerText === "Power On") {
+                powerButton.innerHTML = "Power Off";
+            }
+            else {
+                powerButton.innerHTML = "Power On";
+            }
+            // Close the popup when done
+            document.getElementById("noticePopup1").style.display = "none";
          });
       });
 
@@ -396,19 +463,36 @@
                 // Handle the response from the server
                 console.log(data);  // You can display the result in the console or update your HTML page as needed
             });
+            // Close the popup when done
+            document.getElementById("noticePopup2").style.display = "none";
          });
       });
 
     </script>
 
     <script>
-      // JavaScript to control the popup
-      document.getElementById("openPopup").addEventListener("click", function() {
-        document.getElementById("myPopup").style.display = "block";
+    // JavaScript to control the popup overlay
+    document.getElementById("openOverlay").addEventListener("click", function() {
+      document.getElementById("overlayPopup").style.display = "block";
+    });
+    document.getElementById("closeOverlay").addEventListener("click", function() {
+        document.getElementById("overlayPopup").style.display = "none";
     });
 
-    document.getElementById("closePopup").addEventListener("click", function() {
-        document.getElementById("myPopup").style.display = "none";
+    // JavaScript to control popup1
+    document.getElementById("openPopup1").addEventListener("click", function() {
+      document.getElementById("noticePopup1").style.display = "block";
+    });
+    document.getElementById("closePopup1").addEventListener("click", function() {
+        document.getElementById("noticePopup1").style.display = "none";
+    });
+
+   // JavaScript to control popup2
+    document.getElementById("openPopup2").addEventListener("click", function() {
+      document.getElementById("noticePopup2").style.display = "block";
+    });
+    document.getElementById("closePopup2").addEventListener("click", function() {
+        document.getElementById("noticePopup2").style.display = "none";
     });
     </script>
   </body>
