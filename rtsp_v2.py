@@ -34,6 +34,9 @@ RECORD_SECONDS = 5
 BITS_PER_SAMPLE = 16
 audio1 = pyaudio.PyAudio()
 
+# Set up PulseAudio in the OS to listen to the capture card
+subprocess.call(['sh', './pulseAudio_config.sh'])
+
 # Communication to Arduino Parameters
 #baudrate = 9600 #make sure baudrate is same as arduino
 #port = '/dev/ttyACM0'  #make sure to change the com port based on where it is plugged in
