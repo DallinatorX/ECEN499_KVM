@@ -3,13 +3,13 @@ from pygame.locals import *
 from libraries.sendKeyboardMouse import *
 import serial
 
-serial_input = serial.Serial("/dev/ttyACM0",9600)
+serial_input = serial.Serial("COM12",115200)
 
 # Initialize Pygame
 pygame.init()
 
 # Set screen dimensions
-screen_width, screen_height = 1920, 1080
+screen_width, screen_height = 1000, 1000
 screen = pygame.display.set_mode((screen_width, screen_height))
 pygame.mouse.set_visible(False)
 
@@ -22,26 +22,41 @@ pygame.mouse.set_pos(screen_width // 2, screen_height // 2)
 # Create a clock object to control the frame rate
 clock = pygame.time.Clock()
 
+leftMouseDown = False
 running = True
-
-this = 0
 
 while running:
     for event in pygame.event.get():
         if event.type == QUIT:
             running = False
+        if event.type == MOUSEWHEEL:
+            print(event.x,event.y)
+            sendKeyboardMouseAction("mousescroll",0,event.x, event.y, serial_input)
+       
     
 
     # Get the relative mouse movement
     mouse_dx, mouse_dy = pygame.mouse.get_rel()
+    mouse_left, mouse_wheel, mouse_right = pygame.mouse.get_pressed()
     
-    sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
-    if this == 1:
-        print(mouse_dx,mouse_dy)
-    else:
-        if this == 100:
-            this = 0
-    this += 1
+    if mouse_left:
+        sendKeyboardMouseAction("mousedown", 0, mouse_dx, mouse_dy, serial_input)
+    if not mouse_left:
+        sendKeyboardMouseAction("mouseup", 0, mouse_dx, mouse_dy, serial_input)
+    if mouse_wheel:
+        sendKeyboardMouseAction("mousedown", 1, mouse_dx, mouse_dy, serial_input)
+    if not mouse_wheel:
+        sendKeyboardMouseAction("mouseup", 1, mouse_dx, mouse_dy, serial_input)
+    if mouse_right:
+        sendKeyboardMouseAction("mousedown", 2, mouse_dx, mouse_dy, serial_input)
+    if not mouse_right:
+        sendKeyboardMouseAction("mouseup", 2, mouse_dx, mouse_dy, serial_input)
+
+
+
+    if mouse_dx != 0 | mouse_dy != 0:
+        sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
+
     
 
     # Update the camera position based on mouse movement
