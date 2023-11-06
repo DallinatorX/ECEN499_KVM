@@ -39,10 +39,15 @@ while running:
     mouse_dx, mouse_dy = pygame.mouse.get_rel()
     mouse_left, mouse_wheel, mouse_right = pygame.mouse.get_pressed()
     
-    if mouse_left:
-        sendKeyboardMouseAction("mousedown", 0, mouse_dx, mouse_dy, serial_input)
-    if not mouse_left:
-        sendKeyboardMouseAction("mouseup", 0, mouse_dx, mouse_dy, serial_input)
+    if (mouse_left != leftMouseDown):
+        if mouse_left:
+            sendKeyboardMouseAction("mousedown", 0, mouse_dx, mouse_dy, serial_input)
+        if not mouse_left:
+            sendKeyboardMouseAction("mouseup", 0, mouse_dx, mouse_dy, serial_input)
+        leftMouseDown = mouse_left
+
+
+
     if mouse_wheel:
         sendKeyboardMouseAction("mousedown", 1, mouse_dx, mouse_dy, serial_input)
     if not mouse_wheel:
