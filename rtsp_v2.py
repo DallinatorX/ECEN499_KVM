@@ -1,6 +1,5 @@
 from flask import Flask, render_template, Response, request, jsonify
 import cv2 as cv
-import pyaudio
 import argparse
 import subprocess
 import time
@@ -14,25 +13,12 @@ from libraries.sendKeyboardMouse import *
 rtsp = Flask(__name__)
 
 device = "video0"
-width = 1280
-height = 720
+width = 1920
+height = 1080
 verbose = False
 START_ADDRESS = 8
 MOUSE_INTERPLELATION = 4
 JPEG_QUALITY = 75
-
-# Code for Audio recording:
-# https://stackoverflow.com/questions/51079338/audio-livestreaming-with-python-flask
-
-# Audio Parameters
-AUDIO_DEVICE = 0
-FORMAT = pyaudio.paInt16
-CHANNELS = 2
-RATE = 44100
-CHUNK = 1024
-RECORD_SECONDS = 5
-BITS_PER_SAMPLE = 16
-audio1 = pyaudio.PyAudio()
 
 # Set up PulseAudio in the OS to listen to the capture card
 subprocess.call(['sh', './pulseAudio_config.sh'])
@@ -73,7 +59,8 @@ def process_km_data():
 
 @rtsp.route("/audio_feed")
 def audio_feed():
-    return Response(gen_sound(), mimetype='audio/x-wav; codec=pcm')
+    # return Response(gen_sound(), mimetype='audio/x-wav; codec=pcm')
+    return 0
 
 
 @rtsp.route('/video_feed')
@@ -128,64 +115,6 @@ def gen_frames():
 def getVideoInputDevice():
     frames_loc = '/dev/'+ str(device)
     return frames_loc
-
-
-def gen_sound():
-        global FORMAT, CHANNELS, CHUNK, RATE, BITS_PER_SAMPLE, AUDIO_DEVICE
-
-        # Set to Audio-In of capture card, etc
-
-        wav_header = generateAudioHeader(RATE, BITS_PER_SAMPLE, CHANNELS)
-        stream = audio1.open(format=FORMAT, channels=CHANNELS,
-                        rate=RATE, input=True, input_device_index=AUDIO_DEVICE,
-                        frames_per_buffer=CHUNK)
-
-        # if quiet:
-        #     print("recording...")
-
-        # Send header only once, or else audio bugs
-        first_run = True
-        while True:
-           if first_run:
-               print("Sound POST: Sent Header Chunk")
-               data = wav_header + stream.read(CHUNK)
-               first_run = False
-           else:
-               print("Sound POST: Sent", str(CHUNK), " to POST.")
-               data = stream.read(CHUNK)
-           yield(data)
-
-
-def generateAudioHeader(sampleRate, bitsPerSample, channels):
-    datasize = 2000*10**6
-    o = bytes("RIFF",'ascii')                                               # (4byte) Marks file as RIFF
-    o += (datasize + 36).to_bytes(4,'little')                               
-# (4byte) File size in bytes excluding this and RIFF marker
-    o += bytes("WAVE",'ascii')                                              # (4byte) File type
-    o += bytes("fmt ",'ascii')                                              # (4byte) Format Chunk Marker
-    o += (16).to_bytes(4,'little')                                          # (4byte) Length of above format data
-    o += (1).to_bytes(2,'little')                                           # (2byte) Format type (1 - PCM)
-    o += (channels).to_bytes(2,'little')                                    # (2byte)
-    o += (sampleRate).to_bytes(4,'little')                                  # (4byte)
-    o += (sampleRate * channels * bitsPerSample // 8).to_bytes(4,'little')  # (4byte)
-    o += (channels * bitsPerSample // 8).to_bytes(2,'little')               # (2byte)
-    o += (bitsPerSample).to_bytes(2,'little')                               # (2byte)
-    o += bytes("data",'ascii')                                              # (4byte) Data Chunk Marker
-    o += (datasize).to_bytes(4,'little')                                    # (4byte) Data size in bytes
-    return o
-
-
-# Adapted from: https://stackoverflow.com/questions/36894315/how-to-select-a-specific-input-device-with-pyaudio
-# TODO
-# Command in Ubuntu to display devices: 'pacmd list-sources'
-def getAudioInputDevice():
-    p = pyaudio.PyAudio()
-    info = p.get_host_api_info_by_index(0)
-    numdevices = info.get('deviceCount')
-
-    for i in range(0, numdevices):
-        if (p.get_device_info_by_host_api_device_index(0, i).get('maxInputChannels')) > 0:
-            print("Input Device id ", i, " - ", p.get_device_info_by_host_api_device_index(0, i).get('name'))
 
 def sendMiscAction(key):
     command = MISC_CODES.get(key)

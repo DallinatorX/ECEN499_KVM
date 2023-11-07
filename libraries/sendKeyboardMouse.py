@@ -7,38 +7,38 @@ import time
 KEY_CODES = {   
 'alt': 2,
 'backspace': 4,
-'control': 6,
+'ctrl': 6, # Michael was here
 'delete': 8,
-'arrowDown': 10,
+'down': 10,
 'end': 12,
 'enter': 14,
 'escape': 16,
-'F1': 18,
-'F2': 20,
-'F3': 22,
-'F4': 24,
-'F5': 26,
-'F6': 28,
-'F7': 30,
-'F8': 32,
-'F9': 34,
-'F10': 36,
-'F11': 38,
-'F12': 40,
-'Home': 42,
-'ArrowLeft': 44,
-'PageDown': 46,
-'PageUp': 48,
-'ArrowRight': 50,
+'f1': 18,
+'f2': 20,
+'f3': 22,
+'f4': 24,
+'f5': 26,
+'f6': 28,
+'f7': 30,
+'f8': 32,
+'f9': 34,
+'f10': 36,
+'f11': 38,
+'f12': 40,
+'home': 42,
+'left': 44,
+'page_down': 46,
+'page_up': 48,
+'right': 50,
 'shift': 52,
 'space': 54,
-'Tab': 56,
-'ArrowUp': 58,
-#'AltRight': 60,
-#'ControlRight': 62,
+'tab': 56,
+'up': 58,
+'alt_r': 60,
+'ctrl_r': 62,
 'OS': 64,
 'Meta': 64,
-#'OSRight': 66,
+'OS_r': 66, # Check this one
 'a': 68,
 'A': 68,
 'b': 70,
@@ -121,12 +121,12 @@ KEY_CODES = {
 '{': 146,
 ']': 148,
 '}': 148,
-'\\': 150,
+r'\\': 150, # Check this one
 '|': 150,
-'CapsLock': 152,
+'caps_lock': 152,
 ';': 154,
 ':': 154,
-'\'': 156,
+"'": 156, # Check this one
 '\"': 156,
 ',': 158,
 '<': 158,
@@ -134,7 +134,7 @@ KEY_CODES = {
 '>': 160,
 '/': 162,
 '?': 162,
-'Insert': 164,
+'insert': 164,
 'F13': 166,
 'F14': 168,
 'F15': 170,
@@ -143,7 +143,7 @@ KEY_CODES = {
 'F18': 176,
 'F19': 178,
 'F20': 180,
-#'ShiftRight': 182
+'shift_r': 182
 }
 
 # Initialize Mouse Dictionary
@@ -179,14 +179,15 @@ def sendKeyboardMouseAction(in_type, key, mouseX, mouseY, serial_input):
     in_type = 'mouseup'; release mouse button
     in_type = 'mousescroll'; scroll mouse
 
-    key: It the mosue or keyboard button pressed or released, use the titles lited above (Ex.F12 not f12 or 40)
+    key: If the mouse or keyboard button pressed or released, use the titles listed above (Ex.F12 not f12 or 40)
     mouseX and mouseY: tell the computer how much to move its mouse or how much to scroll
     """
     if (in_type == 'keydown' or in_type == 'keyup'): # Keyboard down/up
         key_code = KEY_CODES.get(str(key))
-        if in_type == 'keydown':
-            key_code += 1
-        data_hex = "\x01" +  chr(key_code)
+        if key_code != None:
+            if in_type == 'keydown':
+                key_code += 1
+            data_hex = "\x01" +  chr(key_code)
 
     elif (in_type == 'mousemove'): # Mouse Move
             #data_hex = "\x02" + chr(abs(int_to_2sComp(int(mouseX)))) + chr(abs(int_to_2sComp(int(mouseY))))
