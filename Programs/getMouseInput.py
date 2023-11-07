@@ -3,7 +3,7 @@ from pygame.locals import *
 from libraries.sendKeyboardMouse import *
 import serial
 
-serial_input = serial.Serial("/dev/ttyACM0",9600)
+serial_input = serial.Serial("COM12",115200)
 
 # Initialize Pygame
 pygame.init()
@@ -22,26 +22,54 @@ pygame.mouse.set_pos(screen_width // 2, screen_height // 2)
 # Create a clock object to control the frame rate
 clock = pygame.time.Clock()
 
+leftMouseDown = False
+rightMouseDown = False
+wheelMouseDown = False
 running = True
-
-this = 0
 
 while running:
     for event in pygame.event.get():
         if event.type == QUIT:
             running = False
+        # mouse wheel event to track wheel movement
+        if event.type == MOUSEWHEEL:
+            print(event.x,event.y)
+            sendKeyboardMouseAction("mousescroll",0,event.x, event.y, serial_input)
+       
     
 
-    # Get the relative mouse movement
+    # Get the relative mouse movement and current state of mouse buttons
     mouse_dx, mouse_dy = pygame.mouse.get_rel()
+    mouse_left, mouse_wheel, mouse_right = pygame.mouse.get_pressed()
     
-    sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
-    if this == 1:
-        print(mouse_dx,mouse_dy)
-    else:
-        if this == 100:
-            this = 0
-    this += 1
+    # check each button to see if the current state is different from the previous state
+    # if the states don't match resolve either the up/down action to return to 
+    # both states matching
+    if mouse_left != leftMouseDown:
+        if mouse_left:
+            sendKeyboardMouseAction("mousedown", 0, mouse_dx, mouse_dy, serial_input)
+        if not mouse_left:
+            sendKeyboardMouseAction("mouseup", 0, mouse_dx, mouse_dy, serial_input)
+        leftMouseDown = mouse_left
+    
+    if mouse_wheel != wheelMouseDown:
+        if mouse_wheel:
+            sendKeyboardMouseAction("mousedown", 1, mouse_dx, mouse_dy, serial_input)
+        if not mouse_wheel:
+            sendKeyboardMouseAction("mouseup", 1, mouse_dx, mouse_dy, serial_input)
+        wheelMouseDown = mouse_wheel
+
+    if mouse_right != rightMouseDown:    
+        if mouse_right:
+            sendKeyboardMouseAction("mousedown", 2, mouse_dx, mouse_dy, serial_input)
+        if not mouse_right:
+            sendKeyboardMouseAction("mouseup", 2, mouse_dx, mouse_dy, serial_input)
+        rightMouseDown = mouse_right
+
+    #mouse movement
+    if mouse_dx != 0 | mouse_dy != 0:
+        sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
+
     
 
     # Update the camera position based on mouse movement
