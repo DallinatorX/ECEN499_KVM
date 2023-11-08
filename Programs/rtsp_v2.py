@@ -5,7 +5,7 @@ import subprocess
 import time
 import sys
 
-from libraries.sendKeyboardMouse import *
+# from libraries.sendKeyboardMouse import *
 
 # Questions regarding Flask or other libraries?
 # Refer to the library documentation online
@@ -133,7 +133,7 @@ def forceShutdown():
     arduino.write(shutdown_code.encode())
 
 
-if __name__ == '__main__':
+def start_rtsp():
     parser = argparse.ArgumentParser()
     parser.add_argument("--device",     "-d", default="video0",                     help="File within the /dev/ directory to use as video feed")
     parser.add_argument("--width",      "-W", default=1920,                         help="Width for video capture")
@@ -155,7 +155,7 @@ if __name__ == '__main__':
     if args.verbose:
         verbose = True
 
-    if (verbose):    
+    # if (verbose):    
         print("\nDetails:")
         print("--Device: " + "/dev/" + str(device))
         print("--width:  " + str(width))
