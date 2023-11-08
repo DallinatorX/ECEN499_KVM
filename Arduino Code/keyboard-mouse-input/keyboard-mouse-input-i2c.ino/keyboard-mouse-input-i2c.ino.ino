@@ -220,8 +220,8 @@ void receiveEvent(int howMany)
     }
     // Mouse Move Events
     else if (type_in == 2) {
-        mouse_x = Wire.read()-60;
-        mouse_y = Wire.read()-60;
+        mouse_x = Wire.read()-100;
+        mouse_y = Wire.read()-100;
         action = 3;
     }
     // Mouse Click Events
@@ -235,7 +235,7 @@ void receiveEvent(int howMany)
     }
     // Mouse Scroll Events
     else if (type_in == 4) {
-        mouse_y = Wire.read();
+        mouse_y = Wire.read()-60;
         action = 6;
     Wire.read();
     }
