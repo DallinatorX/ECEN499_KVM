@@ -5,8 +5,6 @@ import subprocess
 import time
 import sys
 
-# from libraries.sendKeyboardMouse import *
-
 # Questions regarding Flask or other libraries?
 # Refer to the library documentation online
 

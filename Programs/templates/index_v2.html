@@ -477,6 +477,9 @@
     });
     document.getElementById("closeOverlay").addEventListener("click", function() {
         document.getElementById("overlayPopup").style.display = "none";
+
+        // Resume keyboard mouse listening
+        
     });
 
     // JavaScript to control popup1
@@ -494,6 +497,39 @@
     document.getElementById("closePopup2").addEventListener("click", function() {
         document.getElementById("noticePopup2").style.display = "none";
     });
+    
+    // Open and close the popup overlay
+    function toggleOverlay(x) {
+    
+      if (x == 0) {
+        document.getElementById("overlayPopup").style.display = "block";
+      }
+      else if (x == 1) {
+        document.getElementById("overlayPopup").style.display = "none";
+      }
+    
+    }
+    
+    var keys = {}; //makes an array to store keys that are currently pressed
+      window.addEventListener('keydown', (e) => {
+
+      keys[e.key] = true; // sets all keys that are down to true
+
+      // Checks for Control + Alt + u combo
+      if (keys['Control'] && keys['Alt'] && keys['u']) { 
+          toggleOverlay(0); // Open the overlay
+          
+          // Pause keyboard mouse listening
+            
+      }
+      });
+
+      window.addEventListener('keyup', (e) => {
+      keys[e.key] = false;
+      });
+    
+    
+    
     </script>
   </body>
 </html>
