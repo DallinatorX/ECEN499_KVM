@@ -2,7 +2,7 @@ import cv2
 import pygame
 from pygame.locals import *
 
-device = "video2"
+device = "video0"
 
 
 def getVideoInputDevice():
@@ -21,12 +21,10 @@ width = 1920
 height = 1080
 
 
-
 # Initialize OpenCV for video capture
 cap = cv2.VideoCapture(getVideoInputDevice()) #'/dev/video2'
 cap.set(3,width)
 cap.set(4,height)
-
 
 
 while True:
@@ -43,6 +41,8 @@ while True:
 
     # Rotate the frame 90 degrees clockwise
     frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    # Flip the frame over the y axis
+    frame = cv2.flip(frame, 0)
 
     # Resize the frame to double the size
     #frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))

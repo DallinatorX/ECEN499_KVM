@@ -10,7 +10,7 @@ def start_mouse_input(serial_input):
     pygame.init()
 
     # Set screen dimensions
-    screen_width, screen_height = 1920, 1080
+    screen_width, screen_height = 800, 600
     screen = pygame.display.set_mode((screen_width, screen_height))
     pygame.mouse.set_visible(False)
 
@@ -43,6 +43,9 @@ def start_mouse_input(serial_input):
         mouse_dx, mouse_dy = pygame.mouse.get_rel()
         mouse_left, mouse_wheel, mouse_right = pygame.mouse.get_pressed()
 
+        # Get the current state of keyboard keys: Michael was here
+        # keys = pygame.key.get_pressed()
+
         # check each button to see if the current state is different from the previous state
         # if the states don't match resolve either the up/down action to return to 
         # both states matching
@@ -70,6 +73,10 @@ def start_mouse_input(serial_input):
         #mouse movement
         if mouse_dx != 0 | mouse_dy != 0:
             sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
+
+        # #keyboard press: Michael was here
+        # if keys[pygame.K_LALT]:
+        #     sendKeyboardMouseAction('keydown',KEY_CODES.get('alt'),0,0,serial_input)
 
 
 
