@@ -9,7 +9,7 @@ import threading
 
 
 if __name__ == '__main__':
-    serial_input = serial.Serial("/dev/ttyACM0",9600)
+    serial_input = serial.Serial("/dev/ttyACM0",115200)
 
     # Create threads for each function
     keyboard_thread = threading.Thread(target=start_keyboard_input, args=(serial_input,))

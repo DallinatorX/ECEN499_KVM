@@ -2,7 +2,7 @@
 
 void setup() {
   Wire.begin(); // Initialize I2C as Master
-  Serial.begin(9600); // Initialize Serial communication
+  Serial.begin(115200); // Initialize Serial communication
 }
 
 void loop() {

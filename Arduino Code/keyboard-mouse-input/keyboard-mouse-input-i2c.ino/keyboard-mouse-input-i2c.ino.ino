@@ -120,7 +120,7 @@ void setup()
   Mouse.begin();
   Keyboard.begin();
 
-  Serial.begin(9600);
+  Serial.begin(115200);
 
 
   // Begin I2C Bus
