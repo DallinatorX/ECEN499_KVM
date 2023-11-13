@@ -89,7 +89,7 @@ def start_mouse_input(serial_input):
 
         # Draw the world with the camera offset
         # Replace this with your game graphics or rendering logic
-        pygame.draw.rect(screen, (255, 0, 0), (200 - camera_x, 200 - camera_y, 50, 50))
+        #pygame.draw.rect(screen, (255, 0, 0), (200 - camera_x, 200 - camera_y, 50, 50))
 
         # Update the display
         pygame.display.flip()
