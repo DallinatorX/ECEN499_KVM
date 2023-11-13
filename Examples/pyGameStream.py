@@ -21,6 +21,7 @@ screen = pygame.display.set_mode((window_width, window_height))
 width = 1920
 height = 1080
 
+
 # Initialize OpenCV for video capture
 cap = cv2.VideoCapture(getVideoInputDevice())
 cap.set(3, width)
@@ -65,8 +66,13 @@ while True:
         if not ret:
             break
 
-        # Rotate the frame 90 degrees clockwise
-        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    # Rotate the frame 90 degrees clockwise
+    frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    # Flip the frame over the y axis
+    frame = cv2.flip(frame, 0)
+
+    # Resize the frame to double the size
+    #frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
 
         # Convert the frame to RGB (Pygame uses RGB format)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
