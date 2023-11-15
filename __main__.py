@@ -8,7 +8,12 @@ import threading
 import pygame
 from pygame.locals import *
 import cv2
+import pygame_gui
 
+
+def getVideoInputDevice():
+    frames_loc = '/dev/' + str(device)
+    return frames_loc
 
 
 #Set Video device info
