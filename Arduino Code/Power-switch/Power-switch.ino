@@ -32,7 +32,7 @@ void loop() {
     {
       digitalWrite(LED_BUILTIN_RX,LOW);
       digitalWrite(testPin, HIGH);  
-      delay(10000);
+      delay(5000);
       digitalWrite(testPin, LOW);
       digitalWrite(LED_BUILTIN_RX,HIGH);
     }
