@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FlaskBlog</title>
+</head>
+<body>
+    <form>
+        <label for="fname" id="1">First name:</label><br>
+        <input type="text" id="2" name="fname"><br>
+        <label for="lname" id="3">Last name:</label><br>
+        <input type="text" id="4" name="lname">
+        <input type="submit" id="5" name="submit">
+    </form>
+        <button onclick="asd(1)">Hide</button>
+        <button onclick="asd(2)">Show</button>
+    <script>
+        function asd(a)
+        {
+            if(a==1){
+                document.getElementById("1").style.display="none";
+                document.getElementById("2").style.display="none";
+                document.getElementById("3").style.display="none";
+                document.getElementById("4").style.display="none";
+                document.getElementById("5").style.display="none";
+            }
+            else{
+                document.getElementById("1").style.display="block";
+                document.getElementById("2").style.display="block";
+                document.getElementById("3").style.display="block";
+                document.getElementById("4").style.display="block";
+                document.getElementById("5").style.display="block";
+            }
+            document.getElementById("demo").onkeypress = function(){myfunction()};
+
+
+        }
+        var keys = {}; //makes an array to store keys that are currently pressed
+        window.addEventListener('keydown', (e) => {
+        keys[e.key] = true; // sets all keys that are down to true
+        if (keys['Control'] && keys['Alt'] && keys['u']) { //checks for Control + Alt +u combo
+            asd(1); //place a function here that will hide the controls
+        }
+        });
+
+        window.addEventListener('keyup', (e) => {
+        keys[e.key] = false;
+        });
+        
+
+
+    </script>
+
+</body>
+
+</html>

@@ -71,14 +71,16 @@ power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((230, 10),
 
 kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((380, 10), (140, 50)), 
                                             text='Force Shutdown', manager=manager)
-
-#warning_popup = pygame_gui.
+                                            
+exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((530, 10), (140, 50)),
+                                            text='Disconnect', manager=manager)        
 
 while True:
     time_delta = pygame.time.Clock().tick(60) / 1000.0
 
     for event in pygame.event.get():
         if event.type == QUIT:
+            print("Disconnecting from Host...")
             pygame.quit()
             sys.exit()
         elif event.type == KEYDOWN:
@@ -92,13 +94,21 @@ while True:
                 if event.ui_element == hi_button:
                     print("Hi")  # Toggle pause state
                 if event.ui_element == power_button:
+                    
                     print("Host - Toggling power button...")
                     if(warning_popup()):
                         #serial_input.write(power_code.encode())
                 if event.ui_element == kill_button:
                     print("Host - Forcing shutdown...")
+<<<<<<< HEAD
+                    #serial_input.write(shutdown_code.encode())
+                if event.ui_element == exit_button:
+                    print("Disconnecting from Host...")
+                    pygame.quit()
+=======
                     if(warning_popup()):
                         #serial_input.write(shutdown_code.encode())
+>>>>>>> 0106dd7ca23d6fbdfb0a616fffe5fa9d0de0e99c
 
         manager.process_events(event)
 
