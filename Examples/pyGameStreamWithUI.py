@@ -32,6 +32,8 @@ def warning_popup():
             elif event.ui_element == no_button:
                 return 0 
             popup.process_events(event)
+        popup.update(time_delta)
+        popup.drawui(screen)
 
 
 # Initialize Pygame
