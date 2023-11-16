@@ -1,9 +1,17 @@
+from os import kill
 import cv2
 import pygame
 import pygame_gui
+import serial
 from pygame.locals import *
 
+# MACROS/PARAMETERS
 device = "video0"
+power_code = "p"
+shutdown_code = "k"
+
+
+#serial_input = serial.Serial("/dev/ttyACM0",115200)
 
 
 def getVideoInputDevice():
@@ -17,9 +25,11 @@ pygame.init()
 # Set the dimensions of the Pygame window
 window_width = 1920
 window_height = 1080
-screen = pygame.display.set_mode((window_width, window_height))
+screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
 width = 1920
 height = 1080
+
+pygame.display.set_caption("Welcome to KVM!")
 
 
 # Initialize OpenCV for video capture
@@ -33,13 +43,19 @@ paused = False  # Variable to keep track of the pause state
 manager = pygame_gui.UIManager((window_width, window_height))
 
 # Create a button
-pause_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
-                                            text='Pause',
-                                            manager=manager)
+resume_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
+                                            text='Resume', manager=manager)
 
 hi_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((120, 10), (100, 50)),
-                                            text='Hi',
-                                            manager=manager)
+                                            text='Hi', manager=manager)
+
+power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((230, 10), (140, 50)), 
+                                            text='Power On/Off', manager=manager)
+
+kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((380, 10), (140, 50)), 
+                                            text='Force Shutdown', manager=manager)
+
+#warning_popup = pygame_gui.
 
 while True:
     time_delta = pygame.time.Clock().tick(60) / 1000.0
@@ -49,14 +65,21 @@ while True:
             pygame.quit()
             sys.exit()
         elif event.type == KEYDOWN:
-            if event.key == K_TAB and pygame.key.get_mods() & KMOD_SHIFT:
+            if event.key == K_u and pygame.key.get_mods() & KMOD_LALT:
                 paused = not paused  # Toggle pause state
         elif event.type == pygame.USEREVENT:
             if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                if event.ui_element == pause_button:
+                if event.ui_element == resume_button:
+                    print("Host - Resuming...")
                     paused = not paused  # Toggle pause state
                 if event.ui_element == hi_button:
                     print("Hi")  # Toggle pause state
+                if event.ui_element == power_button:
+                    print("Host - Toggling power button...")
+                    #serial_input.write(power_code.encode())
+                if event.ui_element == kill_button:
+                    print("Host - Forcing shutdown...")
+                    #serial_input.write(shutdown_code.encode())
 
         manager.process_events(event)
 
