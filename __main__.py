@@ -21,12 +21,12 @@ device = "video0"
 # window_width = 1920
 # window_height = 1080
 
-window_width = 192*3
-window_height = 108*3
+window_width = 1920
+window_height = 1080
 
 
 #Set the arduino path
-arduino_path = "/dev/ttyACM0"
+arduino_path = "/dev/ttyACM1"
 
 
 if __name__ == '__main__':
@@ -52,13 +52,17 @@ if __name__ == '__main__':
 
 
     # Create a buttons
-    pause_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
-                                                text='Pause',
-                                                manager=manager)
+    resume_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
+                                                text='Resume', manager=manager)
 
-    hi_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((120, 10), (100, 50)),
-                                                text='Hi',
-                                                manager=manager)
+    power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((230, 10), (140, 50)), 
+                                                text='Power On/Off', manager=manager)
+
+    kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((380, 10), (140, 50)), 
+                                                text='Force Shutdown', manager=manager)
+                                                
+    exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((530, 10), (140, 50)),
+                                                text='Disconnect', manager=manager)        
 
 
     # Create threads for each function
@@ -100,7 +104,7 @@ if __name__ == '__main__':
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
-                sys.exit()
+                #sys.exit()
             elif event.type == KEYDOWN:
                 if event.key == K_TAB and pygame.key.get_mods() & KMOD_SHIFT:
                     paused = not paused  # Toggle pause state
@@ -108,10 +112,18 @@ if __name__ == '__main__':
 
             elif event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == pause_button:
+                    if event.ui_element == resume_button:
+                        print("Host - Resuming...")
                         paused = not paused  # Toggle pause state
-                    if event.ui_element == hi_button:
-                        print("Hi")  # Toggle pause state
+                    if event.ui_element == power_button:
+                        print("Host - Toggling power button...")
+                        #serial_input.write(power_code.encode())
+                    if event.ui_element == kill_button:
+                        print("Host - Forcing shutdown...")
+                        #serial_input.write(shutdown_code.encode())
+                    if event.ui_element == exit_button:
+                        print("Disconnecting from Host...")
+                        pygame.quit()
 
             elif event.type == MOUSEWHEEL:#Recored mouse scroll
                 print(event.x,event.y)
@@ -181,7 +193,7 @@ if __name__ == '__main__':
 
             #mouse movement
             if mouse_dx != 0 | mouse_dy != 0:
-                sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
+                sendKeyboardMouseAction("mousemove",0,-mouse_dx,-mouse_dy,serial_input)
 
             # #keyboard press: Michael was here
             # if keys[pygame.K_LALT]:
@@ -194,20 +206,20 @@ if __name__ == '__main__':
             camera_y += mouse_dy
 
             # Clear the screen
-            screen.fill((0, 0, 0))
+            # screen.fill((0, 0, 0))
 
             # Draw the world with the camera offset
             # Replace this with your game graphics or rendering logic
             #pygame.draw.rect(screen, (255, 0, 0), (200 - camera_x, 200 - camera_y, 50, 50))
 
             # Update the display
-            pygame.display.flip()
+            # pygame.display.flip()
 
             # Center the mouse position
             pygame.mouse.set_pos(window_width // 2, window_height // 2)
 
             # Limit frame rate to 60 FPS
-            clock.tick(60)
+            # clock.tick(60)
 
         else:
             # Update the Pygame GUI manager
