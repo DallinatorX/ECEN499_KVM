@@ -18,6 +18,21 @@ def getVideoInputDevice():
     frames_loc = '/dev/' + str(device)
     return frames_loc
 
+def warning_popup():
+    popup = pygame_gui.UIManager((window_width / 4, window_height / 4))
+    yes_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
+                                            text='Yes', manager=popup)
+    no_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
+                                            text='No', manager=popup)
+    while True:
+        time_delta = pygame.time.Clock().tick(60) / 1000.0
+        for event in pygame.event.get():
+            if event.ui_element == yes_button:
+                return 1
+            elif event.ui_element == no_button:
+                return 0 
+            popup.process_events(event)
+
 
 # Initialize Pygame
 pygame.init()
@@ -76,10 +91,12 @@ while True:
                     print("Hi")  # Toggle pause state
                 if event.ui_element == power_button:
                     print("Host - Toggling power button...")
-                    #serial_input.write(power_code.encode())
+                    if(warning_popup()):
+                        #serial_input.write(power_code.encode())
                 if event.ui_element == kill_button:
                     print("Host - Forcing shutdown...")
-                    #serial_input.write(shutdown_code.encode())
+                    if(warning_popup()):
+                        #serial_input.write(shutdown_code.encode())
 
         manager.process_events(event)
 
