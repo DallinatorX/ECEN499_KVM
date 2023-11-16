@@ -18,8 +18,12 @@ def getVideoInputDevice():
 
 #Set Video device info
 device = "video0"
-window_width = 1920
-window_height = 1080
+# window_width = 1920
+# window_height = 1080
+
+window_width = 192*3
+window_height = 108*3
+
 
 #Set the arduino path
 arduino_path = "/dev/ttyACM0"
@@ -36,8 +40,8 @@ if __name__ == '__main__':
 
     # Initialize OpenCV for video capture
     cap = cv2.VideoCapture(getVideoInputDevice())
-    cap.set(3, width)
-    cap.set(4, height)
+    cap.set(3, window_width)
+    cap.set(4, window_height)
 
 
 
@@ -68,7 +72,7 @@ if __name__ == '__main__':
     # rtsp_thread.start()
 
     # Wait for all threads to finish (if needed)
-    keyboard_thread.join()
+    # keyboard_thread.join()
     # mouse_thread.join()
     # rtsp_thread.join()
 
@@ -78,7 +82,7 @@ if __name__ == '__main__':
     camera_x, camera_y = 0, 0
 
     # Set the initial mouse position to the center of the screen
-    pygame.mouse.set_pos(screen_width // 2, screen_height // 2)
+    pygame.mouse.set_pos(window_width // 2, window_height // 2)
 
     # Create a clock object to control the frame rate
     clock = pygame.time.Clock()
@@ -200,7 +204,7 @@ if __name__ == '__main__':
             pygame.display.flip()
 
             # Center the mouse position
-            pygame.mouse.set_pos(screen_width // 2, screen_height // 2)
+            pygame.mouse.set_pos(window_width // 2, window_height // 2)
 
             # Limit frame rate to 60 FPS
             clock.tick(60)
