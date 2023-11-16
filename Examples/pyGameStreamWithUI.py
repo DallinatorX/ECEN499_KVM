@@ -27,6 +27,7 @@ def warning_popup():
     while True:
         time_delta = pygame.time.Clock().tick(60) / 1000.0
         for event in pygame.event.get():
+<<<<<<< HEAD
             if event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
                     if event.ui_element == yes_button:
@@ -35,6 +36,15 @@ def warning_popup():
                         return 0 
                     popup.process_events(event)
 
+=======
+            if event.ui_element == yes_button:
+                return 1
+            elif event.ui_element == no_button:
+                return 0 
+            popup.process_events(event)
+        popup.update(time_delta)
+        popup.drawui(screen)
+>>>>>>> ef09ce5606b8e6a035f596c90ba27f356d8f05b4
 
 
 # Initialize Pygame
