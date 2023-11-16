@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Globemaster KVM</title>
+  </head>
+ 
+  <style>
+    #video-container {
+      width: 100%; 
+      height: 100%;
+    }
+    /*Gets rid of the margin on sides of video frame*/
+    .container-fluid {
+      margin-left: auto;
+      margin-right: auto;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 80vh;
+    }
+  </style>
+ 
+  <!--Options Section of the UI-->
+  <style>
+    body {
+      padding: 0;
+      background-color: black;  
+      color: white;
+      font-size: 25px;
+      visibility: visible;
+    }
+  </style>
+
+  <!--Style for the Force Shutdown warning popup-->
+  <style>
+    /* CSS for the popup container */
+    .popup1 {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        z-index: 1;
+    }
+
+    /* CSS for the popup container */
+    .popup2 {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+        z-index: 2;
+    }
+
+    /* CSS Style for the popup overlay */
+    .overlay-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: black;
+        padding: 20px;
+        border: 3px solid green;
+        border-radius: 5px;
+    }
+    
+    /* CSS Style for the forceShutdown popup warning */
+    .popup-content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: black;
+        padding: 20px;
+        border: 3px solid green;
+        border-radius: 5px;
+    }
+  </style>
+ 
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <body>
+    <!--
+    <audio controls>
+      <source src="{{ url_for('audio_feed') }}"> 
+      Your browser does not support the audio element.
+    </audio>
+    -->
+    <p><center>( Press "Ctrl + Alt + End" to disable Mouse and Keyboard Input )</center></head>
+    <div id="button-container">
+      <!-- <button id="openPopup">Force Shutdown</button> -->
+      <button id="openOverlay">Open Overlay</button>
+      <!-- Add additional buttons here -->
+
+    </div>
+
+    <!-- The Overlay Popup -->
+    <div id="overlayPopup" class="popup1">
+      <div class="overlay-content">
+        <h2>Options</h2>
+        
+        <!-- Take Keyboard and Mouse -->
+        <button id="start-button" onclick="startListening()">Enable Mouse/Keyboard</button>
+        
+        <!-- Turn on or off -->
+        <button id="power-button" onclick="KVM_on_off()">(Old)Power On</button>
+        
+        <!-- Toggle Host PC Power via external Python command-->
+        <button id="openPopup1">Power On/Off</button>
+        
+        <!-- The popup warning for force shutdown -->
+        <button id="openPopup2">Force Shutdown</button>
+        
+        <button id="closeOverlay">Hide</button>
+      </div>
+    </div>
+
+    <!-- The popup warning for power button -->
+    <div id="noticePopup1" class="popup2">
+      <div class="popup-content">
+        <h2>Power On/Off</h2>
+        <p>Are you sure you want to power on/off the gaming PC?</p>
+        <button id="executeFunction1">Proceed</button>
+        <button id="closePopup1">Close</button>
+      </div>
+    </div>
+
+    <!-- The popup warning for forceShutdown -->
+    <div id="noticePopup2" class="popup2">
+      <div class="popup-content">
+        <h2>Force Shutdown</h2>
+        <p>Are you sure you want to force shutdown the gaming PC?</p>
+        <button id="executeFunction2">Proceed</button>
+        <button id="closePopup2">Close</button>
+      </div>
+    </div>
+
+    <div class="container-fluid">
+      <div id="video-container" class="row">
+          <div class="col-lg-8  offset-lg-2">
+              <img src="{{ url_for('video_feed') }}" width="100%" height="85%">
+            </div>
+          </div>
+    </div>
+    <p id="output"></p>
+ 
+    <script>
+      const MAX_EVENTS = 10;
+      const buttonContainer = document.getElementById("button-container");
+      const startButton = document.getElementById("start-button");
+      // Additinal buttons here
+ 
+      let output = document.getElementById("output");
+      let isListening = false;
+      let lockCursor = false;
+      let eventCount = 0;
+      let mouseX = 0;
+      let mouseY = 0;
+      let keysPressed = null; 
+            
+      async function startListening() {
+        isListening = true;
+        lockCursor = true;
+        keysPressed = new Set();
+        eventCount = 0;
+        output.innerHTML = "Listening for keyboard and mouse events...";
+        mouseX = window.innerWidth / 2;
+        mouseY = window.innerHeight / 2;        
+
+        // Set the cursor to a transparent image
+        document.body.style.cursor = "url(data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==), pointer";
+
+        window.addEventListener("keydown", handleKeyDown);
+        window.addEventListener("keyup", handleKeyUp);
+        window.addEventListener("mousedown", handleMouseDown);
+        window.addEventListener("mouseup", handleMouseUp);
+        window.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("wheel", handleWheel);
+        window.addEventListener("contextmenu", event => event.preventDefault());
+        
+        try {
+           await document.body.requestPointerLock({ unadjustedMovement: true, });
+           console.log("Cursor lock successful!");
+        } catch (e) {
+           console.log("Failed to lock mouse pointer: " + e);
+        }        
+
+        if ("keyboard" in navigator) {
+          try {
+            await navigator.keyboard.lock(['Escape']);
+            console.log("Escape key locked");
+          } catch (e) {
+            console.log("Failed to lock Escape key: " + e);
+          }
+        }
+        console.log("Listeners Initialized!");
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen();
+        } else if (document.documentElement.webkitRequestFullscreen) { /* Safari */
+          document.documentElement.webkitRequestFullscreen();
+        } else if (document.documentElement.msRequestFullscreen) { /* IE11 */
+          document.documentElement.msRequestFullscreen();
+        }
+        buttonContainer.style.display = "none";
+        output.style.display = "none";
+      }
+
+      async function stopListening() {
+        isListening = false;
+        lockCursor = false;
+        keysPressed = null;
+        output.innerHTML = "Stopped listening for keyboard and mouse events.";
+
+        // Set the cursor back to default
+        document.body.style.cursor = 'auto';
+
+        window.removeEventListener("keydown", handleKeyDown);
+        window.removeEventListener("keyup", handleKeyUp);
+        window.removeEventListener("mousedown", handleMouseDown);
+        window.removeEventListener("mouseup", handleMouseUp);
+        window.removeEventListener("mousemove", handleMouseMove);
+        window.removeEventListener("wheel", handleWheel);
+        window.removeEventListener("contextmenu", event => event.preventDefault());
+        document.body.exitPointerLock();
+           
+        if ("keyboard" in navigator) {
+          try {
+            await navigator.keyboard.unlock();
+            console.log("Escape key unlocked");
+          } catch (e) {
+            console.log("Failed to unlock Escape key: " + e);
+          }
+        }
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) { /* Safari */
+          document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) { /* IE11 */
+          document.msExitFullscreen();
+        }
+        buttonContainer.style.display = "block";
+        output.style.display = "none";
+      }
+
+      function handleKeyDown(event) {
+        if (isListening) {
+            let data = {
+              "event": "none",
+              "button": "none",
+              "deltaX": "none",
+              "deltaY": "none"
+            };  
+
+            // Prevent default interactions to prevent messing with the data capture. Add any other keys as nessecary
+            if (event.key === "Escape" && !escapeDown) {
+              event.preventDefault();
+            }
+            if (event.key === "Meta" || event.key === "OS") {
+              event.preventDefault();
+            }
+            if (event.key === "/" || event.key === "\'") {
+              event.preventDefault();
+            }
+            if (event.key === "F5" || (event.ctrlKey && event.key === "r")) {
+              event.preventDefault();
+            }
+            if (event.ctrlKey && event.shiftKey && event.key === "i") {
+              event.preventDefault();
+            }
+
+            // Update key state and print event
+            if (!keysPressed.has(event.key)) {
+              keysPressed.add(event.key);
+              data.event = "keydown";
+              data.button = event.key;
+              sendEventAction(data);
+              //console.log("Captured Key Press: ", JSON.stringfify(data));
+            }
+
+            if (event.ctrlKey && event.altKey && event.key === "End") {
+              stopListening();
+            }
+            // Open up the Overlay Again!
+            if (event.ctrlKey && event.altKey && event.key === "1") {
+              document.getElementById("overlayPopup").style.display = "block";
+            }
+          }
+        }
+
+      function handleKeyUp(event) {
+        if (isListening) {
+            let data = {
+              "event": "none",
+              "button": "none",
+              "deltaX": "none",
+              "deltaY": "none"
+            };  
+
+            if (keysPressed.has(event.key)) {
+              keysPressed.delete(event.key);
+            }
+            data.event = "keyup";
+            data.button = event.key;
+            sendEventAction(data);
+        }
+      }
+
+      function handleMouseDown(event) {
+        if (isListening) {
+            let data = {
+              "event": "none",
+              "button": "none",
+              "deltaX": "none",
+              "deltaY": "none"
+            };  
+
+            data.event = "mousedown";
+            data.button = event.button;
+            sendEventAction(data);
+        }
+      }
+
+      function handleMouseUp(event) {
+        if (isListening) {    
+            let data = {
+              "event": "none",
+              "button": "none",
+              "deltaX": "none",
+              "deltaY": "none"
+            };  
+
+            data.event = "mouseup";
+            data.button = event.button;
+            sendEventAction(data);
+        }
+      }
+
+      function handleMouseMove(event) {
+        if (isListening) {
+          let data = {
+            "event": "none",
+            "button": "none",
+            "deltaX": "none",
+            "deltaY": "none"
+          };  
+
+          let cursor = document.getElementById("cursor");
+          let deltaX = event.movementX;
+          let deltaY = event.movementY;
+          data.event = "mousemove";
+          data.deltaX = deltaX;
+          data.deltaY = deltaY;
+          sendEventAction(data);
+          mouseX += deltaX;
+          mouseY += deltaY;
+        }
+      }
+
+      function handleWheel(event) {
+        if (isListening) {
+            let data = {
+              "event": "none",
+              "button": "none",
+              "deltaX": "none",
+              "deltaY": "none"
+            };  
+
+            data.event = "mousescroll";
+            data.deltaX = event.deltaX;
+            data.deltaY = event.deltaY;
+            sendEventAction(data);
+        }
+      }
+
+      function sendEventAction(jsonData) {
+        var startTime = performance.now();
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/process_data', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+           if (xhr.status === 200) {
+              console.log(xhr.responseText);
+           }
+           else {
+              console.error(xhr.statusText);
+           }
+        };
+        xhr.onerror = function() {
+           console.error('Network error');
+        };
+        console.log("Data Sent: ", JSON.stringify(jsonData));
+        xhr.send(JSON.stringify(jsonData));
+        var endTime = performance.now();
+        console.log('Elapsed time: ' + (endTime - startTime) + ' milliseconds');
+      }
+    
+    </script>
+ 
+    <!--Turn on/off KVM-->
+    <script>
+      function KVM_on_off() {
+        let data = {
+            "event": "misc",
+            "button": "none",
+            "deltaX": "none",
+            "deltaY": "none"
+        };  
+        // const powerButton = document.getElementById("power-button");
+        // if (powerButton.innerText === "Power On") {
+        //     data.button = "poweron";
+        //     powerButton.innerHTML = "Power Off";
+        //     sendEventAction(data);
+        //     //alert("You're gonna turn me on!");
+        // }
+        // else {
+        //     data.button = "poweroff";
+        //     powerButton.innerHTML = "Power On";
+        //     sendEventAction(data);
+        //     //alert("No don't turn me off :( ");
+        // }
+      }
+    </script>
+    
+    <script>
+      // executes the python function via the test button
+      $(document).ready(function() {
+        $('#executeFunction1').click(function() {
+            // Define the action you want to execute
+            var action = 'tglPower';  // Change this to the desired action
+
+            // Make an HTTP GET request to the Flask route
+            $.get('/execute/' + action, function(data) {
+                // Handle the response from the server
+                console.log(data);  // You can display the result in the console or update your HTML page as needed
+            });
+
+            const powerButton = document.getElementById("openPopup1");
+            if (powerButton.innerText === "Power On") {
+                powerButton.innerHTML = "Power Off";
+            }
+            else {
+                powerButton.innerHTML = "Power On";
+            }
+            // Close the popup when done
+            document.getElementById("noticePopup1").style.display = "none";
+         });
+      });
+
+      $(document).ready(function() {
+        $('#executeFunction2').click(function() {
+            // Define the action you want to execute
+            var action = 'forceShutdown';  // Change this to the desired action
+
+            // Make an HTTP GET request to the Flask route
+            $.get('/execute/' + action, function(data) {
+                // Handle the response from the server
+                console.log(data);  // You can display the result in the console or update your HTML page as needed
+            });
+            // Close the popup when done
+            document.getElementById("noticePopup2").style.display = "none";
+         });
+      });
+
+    </script>
+
+    <script>
+    // JavaScript to control the popup overlay
+    document.getElementById("openOverlay").addEventListener("click", function() {
+      document.getElementById("overlayPopup").style.display = "block";
+    });
+    document.getElementById("closeOverlay").addEventListener("click", function() {
+        document.getElementById("overlayPopup").style.display = "none";
+    });
+
+    // JavaScript to control popup1
+    document.getElementById("openPopup1").addEventListener("click", function() {
+      document.getElementById("noticePopup1").style.display = "block";
+    });
+    document.getElementById("closePopup1").addEventListener("click", function() {
+        document.getElementById("noticePopup1").style.display = "none";
+    });
+
+   // JavaScript to control popup2
+    document.getElementById("openPopup2").addEventListener("click", function() {
+      document.getElementById("noticePopup2").style.display = "block";
+    });
+    document.getElementById("closePopup2").addEventListener("click", function() {
+        document.getElementById("noticePopup2").style.display = "none";
+    });
+    
+    function toggleOverlay(x) {
+    
+      if (x == 1) {
+        document.getElementById("noticePopup1").style.display = "block";
+      }
+      else {
+        document.getElementById("noticePopup1").style.display = "none";
+      }
+    
+    }
+    
+    
+    var keys = {}; //makes an array to store keys that are currently pressed
+      window.addEventListener('keydown', (e) => {
+
+      keys[e.key] = true; // sets all keys that are down to true
+
+      if (keys['Control'] && keys['Alt'] && keys['u']) { //checks for Control + Alt +u combo
+
+          toggleOverlay(1); //place a function here that will hide the controls
+      }
+      });
+
+      window.addEventListener('keyup', (e) => {
+      keys[e.key] = false;
+      });
+    
+    
+    
+    </script>
+  </body>
+</html>
