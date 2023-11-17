@@ -156,34 +156,8 @@ if __name__ == '__main__':
 
 
         if not paused:
-<<<<<<< HEAD
             # Hide the mouse when unpasued
             pygame.mouse.set_visible(False)
-=======
-            # Read a frame from the video stream
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            # Rotate the frame 90 degrees clockwise
-            frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-            # Flip the frame over the y axis
-            frame = cv2.flip(frame, 0)
-
-            # Resize the frame to double the size
-            #frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
-
-            # Convert the frame to RGB (Pygame uses RGB format)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-            # Convert the frame to Pygame surface
-            frame = pygame.surfarray.make_surface(frame)
-
-            # Blit the frame to the Pygame window
-            screen.blit(frame, (0, 0))
-
-
->>>>>>> 9e06f0c5b288c0401a5e8b7999d82a82aaadd514
 
             mouse_dx, mouse_dy = pygame.mouse.get_rel()
             mouse_left, mouse_wheel, mouse_right = pygame.mouse.get_pressed()
