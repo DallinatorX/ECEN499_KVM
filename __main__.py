@@ -18,8 +18,10 @@ def getVideoInputDevice():
 
 #Set Video device info
 device = "video0"
-# window_width = 1920
-# window_height = 1080
+
+# Other constants
+power_code = "p"
+shutdown_code = "k"
 
 window_width = 192*3
 window_height = 108*3
@@ -43,15 +45,13 @@ if __name__ == '__main__':
     cap.set(3, window_width)
     cap.set(4, window_height)
 
-
-
     paused = False  # Variable to keep track of the pause state
 
     # Initialize Pygame GUI
     manager = pygame_gui.UIManager((window_width, window_height))
 
 
-    # Create a buttons
+    # Create pygame gui buttons
     resume_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
                                                 text='Resume', manager=manager)
 
@@ -67,20 +67,12 @@ if __name__ == '__main__':
 
     # Create threads for each function
     keyboard_thread = threading.Thread(target=start_keyboard_input, args=(serial_input,))
-    # mouse_thread = threading.Thread(target=start_mouse_input, args=(serial_input,))
-    # rtsp_thread = threading.Thread(target=start_rtsp)
 
     # Start the threads
     keyboard_thread.start()
-    # mouse_thread.start()
-    # rtsp_thread.start()
 
     # Wait for all threads to finish (if needed)
     # keyboard_thread.join()
-    # mouse_thread.join()
-    # rtsp_thread.join()
-
-
 
     #Set up pyGame for mouse input
     camera_x, camera_y = 0, 0
@@ -97,16 +89,16 @@ if __name__ == '__main__':
     running = True
 
 
-
     while True:
         time_delta = pygame.time.Clock().tick(60) / 1000.0
 
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
-                #sys.exit()
+                sys.exit()
+                keyboard_thread.join()
             elif event.type == KEYDOWN:
-                if event.key == K_TAB and pygame.key.get_mods() & KMOD_SHIFT:
+                if event.key == K_u and pygame.key.get_mods() & KMOD_ALT:
                     paused = not paused  # Toggle pause state
                     if paused:
                         pygame.mouse.set_visible(True) #Show the mouse when paused
@@ -122,14 +114,16 @@ if __name__ == '__main__':
                         paused = not paused  # Toggle pause state
                     if event.ui_element == power_button:
                         print("Host - Toggling power button...")
-                        #serial_input.write(power_code.encode())
+                        serial_input.write(power_code.encode())
                     if event.ui_element == kill_button:
                         print("Host - Forcing shutdown...")
-                        #serial_input.write(shutdown_code.encode())
+                        serial_input.write(shutdown_code.encode())
                     if event.ui_element == exit_button:
                         print("Disconnecting from Host...")
                         exit()
                         pygame.quit()
+                        sys.exit()
+                        keyboard_thread.join()
 
             elif event.type == MOUSEWHEEL:#Recored mouse scroll
                 print(event.x,event.y)
@@ -137,36 +131,36 @@ if __name__ == '__main__':
 
             manager.process_events(event)
 
+
+	    # Read a frame from the video stream
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Rotate the frame 90 degrees clockwise
+        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        # Flip the frame over the y axis
+        frame = cv2.flip(frame, 0)
+
+    	# Resize the frame to double the size
+    	#frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
+
+        # Convert the frame to RGB (Pygame uses RGB format)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # Convert the frame to Pygame surface
+        frame = pygame.surfarray.make_surface(frame)
+
+    	# Blit the frame to the Pygame window
+        screen.blit(frame, (0, 0))
+
+
         if not paused:
-            # Read a frame from the video stream
-            ret, frame = cap.read()
-            if not ret:
-                break
-
-            # Rotate the frame 90 degrees clockwise
-            frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-            # Flip the frame over the y axis
-            frame = cv2.flip(frame, 0)
-
-            # Resize the frame to double the size
-            #frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
-
-            # Convert the frame to RGB (Pygame uses RGB format)
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-            # Convert the frame to Pygame surface
-            frame = pygame.surfarray.make_surface(frame)
-
-            # Blit the frame to the Pygame window
-            screen.blit(frame, (0, 0))
-
-
+            # Hide the mouse when unpasued
+            pygame.mouse.set_visible(False)
 
             mouse_dx, mouse_dy = pygame.mouse.get_rel()
             mouse_left, mouse_wheel, mouse_right = pygame.mouse.get_pressed()
-
-            # Get the current state of keyboard keys: Michael was here
-            # keys = pygame.key.get_pressed()
 
             # check each button to see if the current state is different from the previous state
             # if the states don't match resolve either the up/down action to return to 
@@ -192,30 +186,14 @@ if __name__ == '__main__':
                     sendKeyboardMouseAction("mouseup", 2, mouse_dx, mouse_dy, serial_input)
                 rightMouseDown = mouse_right
 
-            #mouse movement
+            # mouse movement
             if mouse_dx != 0 | mouse_dy != 0:
                 sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
                 print(mouse_dx,mouse_dy)
 
-            # #keyboard press: Michael was here
-            # if keys[pygame.K_LALT]:
-            #     sendKeyboardMouseAction('keydown',KEY_CODES.get('alt'),0,0,serial_input)
-
-
-
             # Update the camera position based on mouse movement
             # camera_x += mouse_dx
             # camera_y += mouse_dy
-
-            # Clear the screen
-            # screen.fill((0, 0, 0))
-
-            # Draw the world with the camera offset
-            # Replace this with your game graphics or rendering logic
-            #pygame.draw.rect(screen, (255, 0, 0), (200 - camera_x, 200 - camera_y, 50, 50))
-
-            # Update the display
-            # pygame.display.flip()
 
             # Center the mouse position
             pygame.mouse.set_pos(window_width // 2, window_height // 2)
@@ -224,6 +202,7 @@ if __name__ == '__main__':
             # clock.tick(60)
 
         else:
+        	
             # Update the Pygame GUI manager
             manager.update(time_delta)
             # Draw the GUI manager
