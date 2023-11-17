@@ -21,12 +21,12 @@ device = "video0"
 # window_width = 1920
 # window_height = 1080
 
-window_width = 1920
-window_height = 1080
+window_width = 192*3
+window_height = 108*3
 
 
 #Set the arduino path
-arduino_path = "/dev/ttyACM1"
+arduino_path = "/dev/ttyACM0"
 
 
 if __name__ == '__main__':
@@ -108,7 +108,12 @@ if __name__ == '__main__':
             elif event.type == KEYDOWN:
                 if event.key == K_TAB and pygame.key.get_mods() & KMOD_SHIFT:
                     paused = not paused  # Toggle pause state
-                    pygame.mouse.set_visible(True) #Show the mouse when paused
+                    if paused:
+                        pygame.mouse.set_visible(True) #Show the mouse when paused
+                    else:
+                        pygame.mouse.set_visible(False)
+
+
 
             elif event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
@@ -123,6 +128,7 @@ if __name__ == '__main__':
                         #serial_input.write(shutdown_code.encode())
                     if event.ui_element == exit_button:
                         print("Disconnecting from Host...")
+                        exit()
                         pygame.quit()
 
             elif event.type == MOUSEWHEEL:#Recored mouse scroll
@@ -153,11 +159,6 @@ if __name__ == '__main__':
 
             # Blit the frame to the Pygame window
             screen.blit(frame, (0, 0))
-
-            # Hide the mouse when unpasued
-            pygame.mouse.set_visible(False)
-
-
 
 
 
@@ -193,7 +194,8 @@ if __name__ == '__main__':
 
             #mouse movement
             if mouse_dx != 0 | mouse_dy != 0:
-                sendKeyboardMouseAction("mousemove",0,-mouse_dx,-mouse_dy,serial_input)
+                sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
+                print(mouse_dx,mouse_dy)
 
             # #keyboard press: Michael was here
             # if keys[pygame.K_LALT]:
@@ -202,8 +204,8 @@ if __name__ == '__main__':
 
 
             # Update the camera position based on mouse movement
-            camera_x += mouse_dx
-            camera_y += mouse_dy
+            # camera_x += mouse_dx
+            # camera_y += mouse_dy
 
             # Clear the screen
             # screen.fill((0, 0, 0))

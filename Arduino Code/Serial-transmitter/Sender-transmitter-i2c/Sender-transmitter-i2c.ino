@@ -2,6 +2,7 @@
 
 void setup() {
   Wire.begin(); // Initialize I2C as Master
+  Wire.setClock(400000); // Set I2C clock speed to 400kHz (adjust as needed)
   Serial.begin(115200); // Initialize Serial communication
 }
 

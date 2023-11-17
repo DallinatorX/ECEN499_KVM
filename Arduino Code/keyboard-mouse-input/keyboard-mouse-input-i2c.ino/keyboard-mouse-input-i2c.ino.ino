@@ -125,6 +125,8 @@ void setup()
 
   // Begin I2C Bus
   Wire.begin(9);             // join i2c bus with address #4
+  Wire.setClock(400000); // Set I2C clock speed to 400kHz (adjust as needed)
+
   Wire.onReceive(receiveEvent); // register event
 }
 
