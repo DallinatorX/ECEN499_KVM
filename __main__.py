@@ -23,8 +23,8 @@ device = "video0"
 power_code = "p"
 shutdown_code = "k"
 
-window_width = 1920
-window_height = 1080
+window_width = 192*3
+window_height = 108*3
 
 
 #Set the arduino path
@@ -100,7 +100,12 @@ if __name__ == '__main__':
             elif event.type == KEYDOWN:
                 if event.key == K_u and pygame.key.get_mods() & KMOD_ALT:
                     paused = not paused  # Toggle pause state
-                    pygame.mouse.set_visible(True) #Show the mouse when paused
+                    if paused:
+                        pygame.mouse.set_visible(True) #Show the mouse when paused
+                    else:
+                        pygame.mouse.set_visible(False)
+
+
 
             elif event.type == pygame.USEREVENT:
                 if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
@@ -115,6 +120,7 @@ if __name__ == '__main__':
                         serial_input.write(shutdown_code.encode())
                     if event.ui_element == exit_button:
                         print("Disconnecting from Host...")
+                        exit()
                         pygame.quit()
                         sys.exit()
                         keyboard_thread.join()
@@ -150,8 +156,34 @@ if __name__ == '__main__':
 
 
         if not paused:
+<<<<<<< HEAD
             # Hide the mouse when unpasued
             pygame.mouse.set_visible(False)
+=======
+            # Read a frame from the video stream
+            ret, frame = cap.read()
+            if not ret:
+                break
+
+            # Rotate the frame 90 degrees clockwise
+            frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+            # Flip the frame over the y axis
+            frame = cv2.flip(frame, 0)
+
+            # Resize the frame to double the size
+            #frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
+
+            # Convert the frame to RGB (Pygame uses RGB format)
+            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # Convert the frame to Pygame surface
+            frame = pygame.surfarray.make_surface(frame)
+
+            # Blit the frame to the Pygame window
+            screen.blit(frame, (0, 0))
+
+
+>>>>>>> 9e06f0c5b288c0401a5e8b7999d82a82aaadd514
 
             mouse_dx, mouse_dy = pygame.mouse.get_rel()
             mouse_left, mouse_wheel, mouse_right = pygame.mouse.get_pressed()
@@ -182,11 +214,12 @@ if __name__ == '__main__':
 
             # mouse movement
             if mouse_dx != 0 | mouse_dy != 0:
-                sendKeyboardMouseAction("mousemove",0,-mouse_dx,-mouse_dy,serial_input)
+                sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
+                print(mouse_dx,mouse_dy)
 
             # Update the camera position based on mouse movement
-            camera_x += mouse_dx
-            camera_y += mouse_dy
+            # camera_x += mouse_dx
+            # camera_y += mouse_dy
 
             # Center the mouse position
             pygame.mouse.set_pos(window_width // 2, window_height // 2)
