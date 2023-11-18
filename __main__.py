@@ -23,8 +23,8 @@ device = "video0"
 power_code = "p"
 shutdown_code = "k"
 
-window_width = 192*3
-window_height = 108*3
+window_width = 1280
+window_height = 720
 
 
 #Set the arduino path
@@ -74,9 +74,6 @@ if __name__ == '__main__':
     # Wait for all threads to finish (if needed)
     # keyboard_thread.join()
 
-    #Set up pyGame for mouse input
-    camera_x, camera_y = 0, 0
-
     # Set the initial mouse position to the center of the screen
     pygame.mouse.set_pos(window_width // 2, window_height // 2)
 
@@ -101,29 +98,28 @@ if __name__ == '__main__':
                 if event.key == K_u and pygame.key.get_mods() & KMOD_ALT:
                     paused = not paused  # Toggle pause state
                     if paused:
-                        pygame.mouse.set_visible(True) #Show the mouse when paused
+                        pygame.mouse.set_visible(True)  # Show the mouse when paused
                     else:
-                        pygame.mouse.set_visible(False)
+                        pygame.mouse.set_visible(False) # Hide the mouse when not paused
 
 
 
-            elif event.type == pygame.USEREVENT:
-                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == resume_button:
-                        print("Host - Resuming...")
-                        paused = not paused  # Toggle pause state
-                    if event.ui_element == power_button:
-                        print("Host - Toggling power button...")
-                        serial_input.write(power_code.encode())
-                    if event.ui_element == kill_button:
-                        print("Host - Forcing shutdown...")
-                        serial_input.write(shutdown_code.encode())
-                    if event.ui_element == exit_button:
-                        print("Disconnecting from Host...")
-                        exit()
-                        pygame.quit()
-                        sys.exit()
-                        keyboard_thread.join()
+            elif event.type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.ui_element == resume_button:
+                    print("Host - Resuming...")
+                    paused = not paused  # Toggle pause state
+                if event.ui_element == power_button:
+                    print("Host - Toggling power button...")
+                    serial_input.write(power_code.encode())
+                if event.ui_element == kill_button:
+                    print("Host - Forcing shutdown...")
+                    serial_input.write(shutdown_code.encode())
+                if event.ui_element == exit_button:
+                    print("Disconnecting from Host...")
+                    exit()
+                    pygame.quit()
+                    sys.exit()
+                    keyboard_thread.join()
 
             elif event.type == MOUSEWHEEL:#Recored mouse scroll
                 print(event.x,event.y)
@@ -190,10 +186,6 @@ if __name__ == '__main__':
             if mouse_dx != 0 | mouse_dy != 0:
                 sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
                 print(mouse_dx,mouse_dy)
-
-            # Update the camera position based on mouse movement
-            # camera_x += mouse_dx
-            # camera_y += mouse_dy
 
             # Center the mouse position
             pygame.mouse.set_pos(window_width // 2, window_height // 2)
