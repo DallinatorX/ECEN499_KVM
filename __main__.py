@@ -9,12 +9,13 @@ import pygame
 from pygame.locals import *
 import cv2
 import pygame_gui
-import sys
 
 
-def getVideoInputDevice():
-    frames_loc = '/dev/' + str(device)
-    return frames_loc
+
+
+
+
+
 
 
 #Set Video device info
@@ -24,75 +25,35 @@ device = "video0"
 power_code = "p"
 shutdown_code = "k"
 
-window_width = 192*3
-window_height = 108*3
+window_width = 1280
+window_height = 720
 
 
 #Set the arduino path
 arduino_path = "/dev/ttyACM0"
 
 
-if __name__ == '__main__':
-    serial_input = serial.Serial(arduino_path,115200)
-
-    # Initialize Pygame
-    pygame.init()
-    screen = pygame.display.set_mode((window_width, window_height))
-    pygame.mouse.set_visible(False)
-
-
-    # Initialize OpenCV for video capture
-    cap = cv2.VideoCapture(getVideoInputDevice())
-    cap.set(3, window_width)
-    cap.set(4, window_height)
-
-    paused = False  # Variable to keep track of the pause state
-
-    # Initialize Pygame GUI
-    manager = pygame_gui.UIManager((window_width, window_height))
+# Mouse actions
+leftMouseDown = False
+rightMouseDown = False
+wheelMouseDown = False
+running = True
+paused = False  # Variable to keep track of the pause state
 
 
-    # Create pygame gui buttons
-    resume_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
-                                                text='Resume', manager=manager)
-
-    power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((230, 10), (140, 50)), 
-                                                text='Power On/Off', manager=manager)
-
-    kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((380, 10), (140, 50)), 
-                                                text='Force Shutdown', manager=manager)
-                                                
-    exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((530, 10), (140, 50)),
-                                                text='Disconnect', manager=manager)        
 
 
-    # Create threads for each function
-    keyboard_thread = threading.Thread(target=start_keyboard_input, args=(serial_input,))
 
-    # Start the threads
-    keyboard_thread.start()
-
-    # Wait for all threads to finish (if needed)
-    # keyboard_thread.join()
-
-    #Set up pyGame for mouse input
-    camera_x, camera_y = 0, 0
-
-    # Set the initial mouse position to the center of the screen
-    pygame.mouse.set_pos(window_width // 2, window_height // 2)
-
-    # Create a clock object to control the frame rate
-    clock = pygame.time.Clock()
-
-    leftMouseDown = False
-    rightMouseDown = False
-    wheelMouseDown = False
-    running = True
+def getVideoInputDevice():
+    frames_loc = '/dev/' + str(device)
+    return frames_loc
 
 
-    while True:
-        time_delta = pygame.time.Clock().tick(60) / 1000.0
 
+def event_handler():
+    global paused, leftMouseDown, rightMouseDown, wheelMouseDown, running
+
+    while running:
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
@@ -102,30 +63,23 @@ if __name__ == '__main__':
                 if event.key == K_u and pygame.key.get_mods() & KMOD_ALT:
                     paused = not paused  # Toggle pause state
                     if paused:
-                        pygame.mouse.set_visible(True) #Show the mouse when paused
+                        pygame.mouse.set_visible(True)  # Show the mouse when paused
                     else:
-                        pygame.mouse.set_visible(False)
+                        pygame.mouse.set_visible(False) # Hide the mouse when not paused
 
-
-
-            elif event.type == pygame.USEREVENT:
-                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == resume_button:
-                        print("Host - Resuming...")
-                        paused = not paused  # Toggle pause state
-                    if event.ui_element == power_button:
-                        print("Host - Toggling power button...")
-                        serial_input.write(power_code.encode())
-                    if event.ui_element == kill_button:
-                        print("Host - Forcing shutdown...")
-                        serial_input.write(shutdown_code.encode())
-                    if event.ui_element == exit_button:
-                        print("Disconnecting from Host...")
-                        keyboard_thread._stop = True
-                        pygame.quit()
-                        sys.exit()
-                        # keyboard_thread.join()
-                        
+            elif event.type == pygame_gui.UI_BUTTON_PRESSED:
+                if event.ui_element == resume_button:
+                    print("Host - Resuming...")
+                    paused = not paused  # Toggle pause state
+                if event.ui_element == power_button:
+                    print("Host - Toggling power button...")
+                    serial_input.write(power_code.encode())
+                if event.ui_element == kill_button:
+                    print("Host - Forcing shutdown...")
+                    serial_input.write(shutdown_code.encode())
+                if event.ui_element == exit_button:
+                    print("Disconnecting from Host...")
+                    running = False
 
             elif event.type == MOUSEWHEEL:#Recored mouse scroll
                 print(event.x,event.y)
@@ -134,32 +88,13 @@ if __name__ == '__main__':
             manager.process_events(event)
 
 
-	    # Read a frame from the video stream
-        ret, frame = cap.read()
-        if not ret:
-            break
 
-        # Rotate the frame 90 degrees clockwise
-        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        # Flip the frame over the y axis
-        frame = cv2.flip(frame, 0)
-
-    	# Resize the frame to double the size
-    	#frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
-
-        # Convert the frame to RGB (Pygame uses RGB format)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        
-        # Convert the frame to Pygame surface
-        frame = pygame.surfarray.make_surface(frame)
-
-    	# Blit the frame to the Pygame window
-        screen.blit(frame, (0, 0))
-
-
+def mouse_logger(clock):
+    global paused, leftMouseDown, rightMouseDown, wheelMouseDown, running
+    while running:
         if not paused:
             # Hide the mouse when unpasued
-            pygame.mouse.set_visible(False)
+            # pygame.mouse.set_visible(False)
 
             mouse_dx, mouse_dy = pygame.mouse.get_rel()
             mouse_left, mouse_wheel, mouse_right = pygame.mouse.get_pressed()
@@ -193,16 +128,88 @@ if __name__ == '__main__':
                 sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
                 print(mouse_dx,mouse_dy)
 
-            # Update the camera position based on mouse movement
-            # camera_x += mouse_dx
-            # camera_y += mouse_dy
-
             # Center the mouse position
             pygame.mouse.set_pos(window_width // 2, window_height // 2)
 
             # Limit frame rate to 60 FPS
-            # clock.tick(60)
+            clock.tick(60)
 
+
+if __name__ == '__main__':
+    serial_input = serial.Serial(arduino_path,115200)
+
+    # Initialize Pygame
+    pygame.init()
+    screen = pygame.display.set_mode((window_width, window_height))
+    pygame.mouse.set_visible(False)
+
+
+    # Initialize OpenCV for video capture
+    cap = cv2.VideoCapture(getVideoInputDevice())
+    cap.set(3, window_width)
+    cap.set(4, window_height)
+
+    
+
+    # Initialize Pygame GUI
+    manager = pygame_gui.UIManager((window_width, window_height))
+
+
+    # Create pygame gui buttons
+    resume_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
+                                                text='Resume', manager=manager)
+
+    power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((230, 10), (140, 50)), 
+                                                text='Power On/Off', manager=manager)
+
+    kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((380, 10), (140, 50)), 
+                                                text='Force Shutdown', manager=manager)
+                                                
+    exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((530, 10), (140, 50)),
+                                                text='Disconnect', manager=manager)        
+
+
+    # Create a clock object to control the frame rate
+    clock = pygame.time.Clock()
+
+    # Create threads for each function
+    keyboard_thread = threading.Thread(target=start_keyboard_input, args=(serial_input,))
+    mouse_thred = threading.Thread(target=mouse_logger,args=(clock,))
+    event_thread = threading.Thread(target=event_handler,)
+
+    # Start the threads
+    keyboard_thread.start()
+    event_thread.start()
+    mouse_thred.start()
+
+    while running:
+        time_delta = pygame.time.Clock().tick(60) / 1000.0
+
+	    # Read a frame from the video stream
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        # Rotate the frame 90 degrees clockwise
+        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        # Flip the frame over the y axis
+        frame = cv2.flip(frame, 0)
+
+    	# Resize the frame to double the size
+    	#frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
+
+        # Convert the frame to RGB (Pygame uses RGB format)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # Convert the frame to Pygame surface
+        frame = pygame.surfarray.make_surface(frame)
+
+    	# Blit the frame to the Pygame window
+        screen.blit(frame, (0, 0))
+
+
+        if not paused:
+            pass
         else:
         	
             # Update the Pygame GUI manager
@@ -212,5 +219,6 @@ if __name__ == '__main__':
 
         pygame.display.flip()
 
+    
     cap.release()
     pygame.quit()
