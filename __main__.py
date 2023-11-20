@@ -5,6 +5,7 @@ This is the core file for the KVM. Running this will start all needed function.
 from Programs.getkeyboardinput import *
 from Programs.getMouseInput import *
 import threading
+import subprocess
 import pygame
 from pygame.locals import *
 import tkinter as tk
@@ -27,6 +28,8 @@ screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE
 #Set the arduino path
 arduino_path = "/dev/ttyACM1"
 
+# Set up PulseAudio in the OS to listen to the capture card
+subprocess.call(['sh', './Programs/pulseAudio_config.sh'])
 
 # Mouse actions
 leftMouseDown = False
@@ -41,7 +44,7 @@ def getVideoInputDevice():
     return frames_loc
 
 def event_handler():
-    global paused, leftMouseDown, rightMouseDown, wheelMouseDown, running
+    global paused, leftMouseDown, rightMouseDown, wheelMouseDown, running, fullscreen
 
     while running:
         for event in pygame.event.get():
