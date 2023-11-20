@@ -70,22 +70,24 @@ manager = pygame_gui.UIManager((window_width, window_height))
 resume_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
                                             text='Resume', manager=manager)
 
-power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((230, 10), (140, 50)), 
-                                            text='Power On/Off', manager=manager)
-
-kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((380, 10), (140, 50)), 
-                                            text='Force Shutdown', manager=manager)
-                                            
-exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((530, 10), (140, 50)),
-                                            text='Disconnect', manager=manager)
-        
-fullscreen_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((680, 10), (140, 50)),
+fullscreen_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((120, 10), (120, 50)),
                                                  text='Fullscreen',
                                                  manager=manager)
 
-feedback_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((830, 10), (150, 50)),
+feedback_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((250, 10), (150, 50)),
                                                text='Submit Feedback',
                                                manager=manager)
+
+power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((410, 10), (140, 50)), 
+                                            text='Power On/Off', manager=manager)
+
+kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((560, 10), (140, 50)), 
+                                            text='Force Shutdown', manager=manager)
+                                            
+exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((710, 10), (140, 50)),
+                                            text='Disconnect', manager=manager)
+        
+
 
 while True:
     time_delta = pygame.time.Clock().tick(60) / 1000.0
@@ -104,39 +106,38 @@ while True:
                     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
                 else:
                     screen = pygame.display.set_mode((window_width, window_height))     
-        elif event.type == pygame.USEREVENT:
-            if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                if event.ui_element == resume_button:
-                    print("Host - Resuming...")
-                    paused = not paused  # Toggle pause state  
-                if event.ui_element == power_button:
-                    if(warning_popup()):
-                        print("Host - Toggling power button...")
-                        #serial_input.write(power_code.encode())
-                if event.ui_element == kill_button:
-                    if (warning_popup()):
-                        print("Host - Forcing shutdown...")
-                        #serial_input.write(shutdown_code.encode())
-                if event.ui_element == exit_button:
-                    if(warning_popup()):
-                        print("Disconnecting from Host...")
-                        pygame.quit()
-                if event.ui_element == fullscreen_button:
-                    fullscreen = not fullscreen  # Toggle fullscreen state
-                    if fullscreen:
-                        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-                    else:
-                        screen = pygame.display.set_mode((window_width, window_height))
-                if event.ui_element == feedback_button:
-                    # Open a dialog to get user feedback
-                    root = tk.Tk()
-                    root.withdraw()
-                    feedback = simpledialog.askstring("Feedback", "Enter your feedback:")
-                    
-                    # Write feedback to a text file
-                    if feedback:
-                        with open('user_feedback.txt', 'a') as file:
-                            file.write(feedback + '\n')    
+        elif event.type == pygame_gui.UI_BUTTON_PRESSED:
+            if event.ui_element == resume_button:
+                print("Host - Resuming...")
+                paused = not paused  # Toggle pause state  
+            if event.ui_element == power_button:
+                if(warning_popup()):
+                    print("Host - Toggling power button...")
+                    #serial_input.write(power_code.encode())
+            if event.ui_element == kill_button:
+                if (warning_popup()):
+                    print("Host - Forcing shutdown...")
+                    #serial_input.write(shutdown_code.encode())
+            if event.ui_element == exit_button:
+                if(warning_popup()):
+                    print("Disconnecting from Host...")
+                    pygame.quit()
+            if event.ui_element == fullscreen_button:
+                fullscreen = not fullscreen  # Toggle fullscreen state
+                if fullscreen:
+                    screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+                else:
+                    screen = pygame.display.set_mode((window_width, window_height))
+            if event.ui_element == feedback_button:
+                # Open a dialog to get user feedback
+                root = tk.Tk()
+                root.withdraw()
+                feedback = simpledialog.askstring("Feedback", "Enter your feedback:")
+                
+                # Write feedback to a text file
+                if feedback:
+                    with open('user_feedback.txt', 'a') as file:
+                        file.write(feedback + '\n')    
 
         manager.process_events(event)
 
