@@ -26,5 +26,19 @@ def on_release(key, serial_input):
 
 # Create keyboard listeners
 def start_keyboard_input(serial_input):
-    with Listener(on_press=lambda key: on_press(key, serial_input), on_release=lambda key: on_release(key, serial_input)) as listener:
+    stop_flag = False  # Flag to signal listener to stop
+
+    def on_press_wrapper(key):
+        nonlocal stop_flag
+        if stop_flag:
+            return False  # Stop the listener
+        return on_press(key, serial_input)
+
+    def on_release_wrapper(key):
+        nonlocal stop_flag
+        if stop_flag:
+            return False  # Stop the listener
+        return on_release(key, serial_input)
+
+    with Listener(on_press=on_press_wrapper, on_release=on_release_wrapper) as listener:
         listener.join()
