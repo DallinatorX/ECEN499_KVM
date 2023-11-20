@@ -10,14 +10,6 @@ from pygame.locals import *
 import cv2
 import pygame_gui
 
-
-
-
-
-
-
-
-
 #Set Video device info
 device = "video0"
 
@@ -30,7 +22,7 @@ window_height = 720
 
 
 #Set the arduino path
-arduino_path = "/dev/ttyACM0"
+arduino_path = "/dev/ttyACM1"
 
 
 # Mouse actions
@@ -40,15 +32,9 @@ wheelMouseDown = False
 running = True
 paused = False  # Variable to keep track of the pause state
 
-
-
-
-
 def getVideoInputDevice():
     frames_loc = '/dev/' + str(device)
     return frames_loc
-
-
 
 def event_handler():
     global paused, leftMouseDown, rightMouseDown, wheelMouseDown, running
@@ -86,8 +72,6 @@ def event_handler():
                 sendKeyboardMouseAction("mousescroll",0,event.x, event.y, serial_input)
 
             manager.process_events(event)
-
-
 
 def mouse_logger(clock):
     global paused, leftMouseDown, rightMouseDown, wheelMouseDown, running
@@ -134,7 +118,6 @@ def mouse_logger(clock):
             # Limit frame rate to 60 FPS
             clock.tick(60)
 
-
 if __name__ == '__main__':
     serial_input = serial.Serial(arduino_path,115200)
 
@@ -143,17 +126,13 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode((window_width, window_height))
     pygame.mouse.set_visible(False)
 
-
     # Initialize OpenCV for video capture
     cap = cv2.VideoCapture(getVideoInputDevice())
     cap.set(3, window_width)
     cap.set(4, window_height)
 
-    
-
     # Initialize Pygame GUI
     manager = pygame_gui.UIManager((window_width, window_height))
-
 
     # Create pygame gui buttons
     resume_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
@@ -167,7 +146,6 @@ if __name__ == '__main__':
                                                 
     exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((530, 10), (140, 50)),
                                                 text='Disconnect', manager=manager)        
-
 
     # Create a clock object to control the frame rate
     clock = pygame.time.Clock()
@@ -207,7 +185,6 @@ if __name__ == '__main__':
     	# Blit the frame to the Pygame window
         screen.blit(frame, (0, 0))
 
-
         if not paused:
             pass
         else:
@@ -218,7 +195,6 @@ if __name__ == '__main__':
             manager.draw_ui(screen)
 
         pygame.display.flip()
-
     
     cap.release()
     pygame.quit()
