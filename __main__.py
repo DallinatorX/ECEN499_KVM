@@ -21,6 +21,7 @@ shutdown_code = "k"
 
 window_width = 1280
 window_height = 720
+screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
 
 
 #Set the arduino path
@@ -33,6 +34,7 @@ rightMouseDown = False
 wheelMouseDown = False
 running = True
 paused = False  # Variable to keep track of the pause state
+fullscreen = False # Variable to keep track of the fullscreen state
 
 def getVideoInputDevice():
     frames_loc = '/dev/' + str(device)
