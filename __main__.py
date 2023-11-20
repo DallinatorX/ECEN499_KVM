@@ -9,6 +9,7 @@ import pygame
 from pygame.locals import *
 import cv2
 import pygame_gui
+import sys
 
 
 def getVideoInputDevice():
@@ -120,10 +121,11 @@ if __name__ == '__main__':
                         serial_input.write(shutdown_code.encode())
                     if event.ui_element == exit_button:
                         print("Disconnecting from Host...")
-                        exit()
+                        keyboard_thread._stop = True
                         pygame.quit()
                         sys.exit()
-                        keyboard_thread.join()
+                        # keyboard_thread.join()
+                        
 
             elif event.type == MOUSEWHEEL:#Recored mouse scroll
                 print(event.x,event.y)
