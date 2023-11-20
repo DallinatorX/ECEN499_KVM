@@ -21,21 +21,25 @@ def getVideoInputDevice():
     return frames_loc
 
 def warning_popup():
-    popup = pygame_gui.UIManager((window_width / 4, window_height / 4))
+    popup = pygame_gui.UIManager((500, 500))
     yes_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
                                             text='Yes', manager=popup)
-    no_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
+    no_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((130, 10), (100, 50)),
                                             text='No', manager=popup)
     while True:
         time_delta = pygame.time.Clock().tick(60) / 1000.0
         for event in pygame.event.get():
-            if event.ui_element == yes_button:
-                return 1
-            elif event.ui_element == no_button:
-                return 0 
+            if event.type == pygame.USEREVENT:
+                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
+                    if event.ui_element == yes_button:
+                        return 1
+                    elif event.ui_element == no_button:
+                        return 0 
             popup.process_events(event)
-        popup.update(time_delta)
-        popup.drawui(screen)
+            popup.update(time_delta)
+            popup.draw_ui(screen)
+        popup.process_events(event)
+        pygame.display.flip()
 
 
 # Initialize Pygame
