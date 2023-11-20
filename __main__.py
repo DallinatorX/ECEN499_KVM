@@ -7,6 +7,8 @@ from Programs.getMouseInput import *
 import threading
 import pygame
 from pygame.locals import *
+import tkinter as tk
+from tkinter import simpledialog
 import cv2
 import pygame_gui
 
@@ -66,6 +68,22 @@ def event_handler():
                 if event.ui_element == exit_button:
                     print("Disconnecting from Host...")
                     running = False
+                if event.ui_element == fullscreen_button:
+                    fullscreen = not fullscreen  # Toggle fullscreen state
+                    if fullscreen:
+                        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+                    else:
+                        screen = pygame.display.set_mode((window_width, window_height))
+                if event.ui_element == feedback_button:
+                    # Open a dialog to get user feedback
+                    root = tk.Tk()
+                    root.withdraw()
+                    feedback = simpledialog.askstring("Feedback", "Enter your feedback:")
+                    
+                    # Write feedback to a text file
+                    if feedback:
+                        with open('user_feedback.txt', 'a') as file:
+                            file.write(feedback + '\n')   
 
             elif event.type == MOUSEWHEEL:#Recored mouse scroll
                 print(event.x,event.y)
@@ -137,15 +155,16 @@ if __name__ == '__main__':
     # Create pygame gui buttons
     resume_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
                                                 text='Resume', manager=manager)
-
-    power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((230, 10), (140, 50)), 
+    fullscreen_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((120, 10), (120, 50)),
+                                                    text='Fullscreen', manager=manager)
+    feedback_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((250, 10), (150, 50)),
+                                                text='Submit Feedback', manager=manager)
+    power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((410, 10), (140, 50)), 
                                                 text='Power On/Off', manager=manager)
-
-    kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((380, 10), (140, 50)), 
-                                                text='Force Shutdown', manager=manager)
-                                                
-    exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((530, 10), (140, 50)),
-                                                text='Disconnect', manager=manager)        
+    kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((560, 10), (140, 50)), 
+                                                text='Force Shutdown', manager=manager)                           
+    exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((710, 10), (140, 50)),
+                                                text='Disconnect', manager=manager)
 
     # Create a clock object to control the frame rate
     clock = pygame.time.Clock()
