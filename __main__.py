@@ -26,7 +26,7 @@ screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE
 
 
 #Set the arduino path
-arduino_path = "/dev/ttyACM1"
+arduino_path = "/dev/ttyACM0"
 
 # Set up PulseAudio in the OS to listen to the capture card
 subprocess.call(['sh', './Programs/pulseAudio_config.sh'])
@@ -43,8 +43,18 @@ def getVideoInputDevice():
     frames_loc = '/dev/' + str(device)
     return frames_loc
 
+def toggle_pause_mode():
+    """Toggles pause-state boolean and visibility of local mouse pointer"""
+    global paused
+    paused = not paused  # Toggle pause state
+    if paused:
+        pygame.mouse.set_visible(True)  # Show the mouse when paused
+    else:
+        pygame.mouse.set_visible(False) # Hide the mouse when not paused
+
+
 def event_handler():
-    global paused, leftMouseDown, rightMouseDown, wheelMouseDown, running, fullscreen
+    global leftMouseDown, rightMouseDown, wheelMouseDown, running, fullscreen
 
     while running:
         for event in pygame.event.get():
@@ -54,16 +64,12 @@ def event_handler():
                 keyboard_thread.join()
             elif event.type == KEYDOWN:
                 if event.key == K_u and pygame.key.get_mods() & KMOD_ALT:
-                    paused = not paused  # Toggle pause state
-                    if paused:
-                        pygame.mouse.set_visible(True)  # Show the mouse when paused
-                    else:
-                        pygame.mouse.set_visible(False) # Hide the mouse when not paused
+                    toggle_pause_mode() # Toggles pause state
 
             elif event.type == pygame_gui.UI_BUTTON_PRESSED:
                 if event.ui_element == resume_button:
                     print("Host - Resuming...")
-                    paused = not paused  # Toggle pause state
+                    toggle_pause_mode() # Toggles pause state
                 if event.ui_element == power_button:
                     print("Host - Toggling power button...")
                     serial_input.write(power_code.encode())
@@ -100,8 +106,6 @@ def mouse_logger(clock):
     global paused, leftMouseDown, rightMouseDown, wheelMouseDown, running
     while running:
         if not paused:
-            # Hide the mouse when unpasued
-            # pygame.mouse.set_visible(False)
 
             mouse_dx, mouse_dy = pygame.mouse.get_rel()
             mouse_left, mouse_wheel, mouse_right = pygame.mouse.get_pressed()
