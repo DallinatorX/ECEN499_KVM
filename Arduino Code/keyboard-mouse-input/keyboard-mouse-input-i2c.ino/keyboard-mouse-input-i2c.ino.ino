@@ -3,7 +3,7 @@
 #include <Keyboard.h>
 
 byte key_array[200];
-uint8_t type_in, key_in, action;
+uint8_t type_in, key_in, action, power_command;
 signed char mouse_x, mouse_y;
 
 void setup()
@@ -155,6 +155,16 @@ void loop()
     case 6: // Mouse Scroll
       Mouse.move(0, 0, mouse_y);
       break;
+
+    case 7:
+      if (power_command == 1){
+        
+        };
+      if (power_command == 2){
+        
+        };
+
+      
     default:
       break;
   }
@@ -209,5 +219,9 @@ void receiveEvent(int howMany)
         action = 6;
     Wire.read();
     }
+    else if (type_in == 5){
+      power_command = Wire.read();
+      action = 7;
+      }
   }
 }
