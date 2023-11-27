@@ -6,6 +6,10 @@ byte key_array[200];
 uint8_t type_in, key_in, action, power_command;
 signed char mouse_x, mouse_y;
 
+int PowerPin = 9; // This is the pin that you will connet the brown wire to
+// The black wire goes to the ground of the arduino
+
+
 void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
@@ -157,13 +161,19 @@ void loop()
       break;
 
     case 7:
-      if (power_command == 1){
-        
-        };
-      if (power_command == 2){
-        
-        };
-
+    if(power_command == 'p') // If P was sent, turn on/off the computer
+    {
+      digitalWrite(PowerPin, HIGH);  // Act as if you are pushing down the button
+      delay(500); // Hold it for half a second
+      digitalWrite(PowerPin, LOW); // Release the Button
+    }
+    if(power_command == 'k') // If k was sent then hold the power button for 10 seconds to kill the computer
+    {
+      digitalWrite(PowerPin, HIGH);  
+      delay(5000);
+      digitalWrite(PowerPin, LOW);
+    }
+    break;
       
     default:
       break;
