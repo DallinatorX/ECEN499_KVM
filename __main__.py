@@ -216,7 +216,7 @@ if __name__ == '__main__':
     clock = pygame.time.Clock()
 
     # Create threads for each function
-    keyboard_thread = threading.Thread(target=start_keyboard_input, args=(serial_input,))
+    keyboard_thread = threading.Thread(target=start_keyboard_input, args=(serial_input, verbose,))
     mouse_thred = threading.Thread(target=mouse_logger,args=(clock,))
     event_thread = threading.Thread(target=event_handler,)
 
