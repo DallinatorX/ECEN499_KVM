@@ -20,16 +20,14 @@ device = "video0"
 power_code = "p"
 shutdown_code = "k"
 
-window_width = 1280
-window_height = 720
+window_width = 1920
+window_height = 1080
 screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
 
 
 #Set the arduino path
 arduino_path = "/dev/ttyACM0"
 
-# Set up PulseAudio in the OS to listen to the capture card
-subprocess.call(['sh', './Programs/pulseAudio_config.sh'])
 
 # Mouse actions
 leftMouseDown = False
@@ -148,6 +146,10 @@ def mouse_logger(clock):
 if __name__ == '__main__':
     serial_input = serial.Serial(arduino_path,115200)
 
+    # Set up PulseAudio in the OS to listen to the capture card
+    # subprocess.call(['sh', './Programs/pulseAudio_config.sh'])
+
+
     # Initialize Pygame
     pygame.init()
     screen = pygame.display.set_mode((window_width, window_height))
@@ -202,8 +204,10 @@ if __name__ == '__main__':
         frame = cv2.flip(frame, 0)
 
     	# Resize the frame to double the size
-    	#frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
-
+    	# frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
+        frame = cv2.resize(frame, (window_height,window_width) )
+        
+        
         # Convert the frame to RGB (Pygame uses RGB format)
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
         

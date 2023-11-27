@@ -1,6 +1,6 @@
 [Desktop Entry]
 Name=KVM
-Exec=/usr/bin/env python3 /home/user/Documents/ECEN499_KVM-main/__main__.py
-Icon=/home/user/Documents/ECEN499_KVM-main/gaming.png
+Exec=/usr/bin/python3 /home/user/Desktop/KVM/ECEN499_KVM/__main__.py
+Icon=/home/user/Desktop/KVM/ECEN499_KVM/gaming.png
 Terminal=false
 Type=Application
