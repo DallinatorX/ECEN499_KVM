@@ -53,8 +53,81 @@ def toggle_pause_mode():
         pygame.mouse.set_visible(False) # Hide the mouse when not paused
 
 
-def event_handler():
-    global leftMouseDown, rightMouseDown, wheelMouseDown, running, fullscreen
+#Set the arduino path
+arduino_path = "/dev/ttyACM1"
+
+
+if __name__ == '__main__':
+    serial_input = serial.Serial(arduino_path,115200)
+
+    # Initialize Pygame
+    pygame.init()
+    screen = pygame.display.set_mode((window_width, window_height))
+    pygame.mouse.set_visible(False)
+
+
+    # Initialize OpenCV for video capture
+    cap = cv2.VideoCapture(getVideoInputDevice())
+    cap.set(3, window_width)
+    cap.set(4, window_height)
+
+
+
+    paused = False  # Variable to keep track of the pause state
+
+    # Initialize Pygame GUI
+    manager = pygame_gui.UIManager((window_width, window_height))
+
+
+    # Create a buttons
+    resume_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
+                                                text='Resume', manager=manager)
+
+    power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((230, 10), (140, 50)), 
+                                                text='Power On/Off', manager=manager)
+
+    kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((380, 10), (140, 50)), 
+                                                text='Force Shutdown', manager=manager)
+                                                
+    exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((530, 10), (140, 50)),
+                                                text='Disconnect', manager=manager)        
+
+
+    # Create threads for each function
+    keyboard_thread = threading.Thread(target=start_keyboard_input, args=(serial_input,))
+    # mouse_thread = threading.Thread(target=start_mouse_input, args=(serial_input,))
+    # rtsp_thread = threading.Thread(target=start_rtsp)
+
+    # Start the threads
+    keyboard_thread.start()
+    # mouse_thread.start()
+    # rtsp_thread.start()
+
+    # Wait for all threads to finish (if needed)
+    # keyboard_thread.join()
+    # mouse_thread.join()
+    # rtsp_thread.join()
+
+
+
+    #Set up pyGame for mouse input
+    camera_x, camera_y = 0, 0
+
+    # Set the initial mouse position to the center of the screen
+    pygame.mouse.set_pos(window_width // 2, window_height // 2)
+
+    # Create a clock object to control the frame rate
+    clock = pygame.time.Clock()
+
+    leftMouseDown = False
+    rightMouseDown = False
+    wheelMouseDown = False
+    running = True
+
+
+
+    while True:
+        time_delta = pygame.time.Clock().tick(60) / 1000.0
 
     while running:
         for event in pygame.event.get():

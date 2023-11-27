@@ -6,6 +6,8 @@ import serial
 import tkinter as tk
 from tkinter import simpledialog
 from pygame.locals import *
+from tkinter import *
+from tkinter.ttk import *
 
 # MACROS/PARAMETERS
 device = "video0"
@@ -20,26 +22,28 @@ def getVideoInputDevice():
     frames_loc = '/dev/' + str(device)
     return frames_loc
 
+
+def yes_button():
+    global answer
+    answer = True
+def no_button():
+    global answer
+    answer = False
+
 def warning_popup():
-    popup = pygame_gui.UIManager((500, 500))
-    yes_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
-                                            text='Yes', manager=popup)
-    no_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((130, 10), (100, 50)),
-                                            text='No', manager=popup)
-    while True:
-        time_delta = pygame.time.Clock().tick(60) / 1000.0
-        for event in pygame.event.get():
-            if event.type == pygame.USEREVENT:
-                if event.user_type == pygame_gui.UI_BUTTON_PRESSED:
-                    if event.ui_element == yes_button:
-                        return 1
-                    elif event.ui_element == no_button:
-                        return 0 
-            popup.process_events(event)
-            popup.update(time_delta)
-            popup.draw_ui(screen)
-        popup.process_events(event)
-        pygame.display.flip()
+    answer = False
+    root = Tk()
+    root.geometry("250x100")
+    
+    root.title("Warning Popup")
+    
+    btn1 = Button(root, text = 'Yes', command=lambda:[yes_button(), root.destroy()]).pack(side = 'left')
+    btn2 = Button(root, text = 'No', command=lambda:[no_button(), root.destroy()]).pack(side = 'right')
+
+    label = Label(root, text ="Are you sure?").pack()
+
+    root.mainloop()
+    return answer
 
 
 # Initialize Pygame
