@@ -10,16 +10,13 @@ import tkinter as tk
 from tkinter import simpledialog
 import cv2
 import pygame_gui
+from libraries.sendPowerSwitch import *
 
 #Set Video device info
 device = "video0"
 
 #Set the arduino path
 arduino_path = "/dev/ttyACM0"
-
-# Other constants
-power_code = "p"
-shutdown_code = "k"
 
 # Turn on Verbose
 verbose = False
@@ -124,8 +121,12 @@ def event_handler():
                 
                 if event.ui_element == kill_button:
                     if(warning_popup()):
-                        print("Host - Forcing shutdown...")
-                        serial_input.write(shutdown_code.encode())
+                        print("Host - Toggling power button...")
+                        click_power_button(serial_input)
+                    
+                if event.ui_element == kill_button:
+                    print("Host - Forcing shutdown...")
+                    hold_power_button(serial_input)
                 
                 if event.ui_element == exit_button:
                     if(warning_popup()):
