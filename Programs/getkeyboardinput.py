@@ -9,7 +9,7 @@ current_keys = set()
 # Define functions for keypress and key release events
 
 # On Key Press
-def on_press(key, serial_input):
+def on_press(key, serial_input,verbose):
     if key not in current_keys:
         current_keys.add(key)
         
@@ -22,7 +22,7 @@ def on_press(key, serial_input):
         sendKeyboardMouseAction('keydown',key_str,0,0,serial_input)
 
 # On key release
-def on_release(key, serial_input):
+def on_release(key, serial_input,verbose):
     if key in current_keys:
         current_keys.remove(key)
 
@@ -34,20 +34,20 @@ def on_release(key, serial_input):
         
 
 # Create keyboard listeners
-def start_keyboard_input(serial_input):
+def start_keyboard_input(serial_input,verbose):
     stop_flag = False  # Flag to signal listener to stop
 
     def on_press_wrapper(key):
         nonlocal stop_flag
         if stop_flag:
             return False  # Stop the listener
-        return on_press(key, serial_input)
+        return on_press(key, serial_input,verbose)
 
     def on_release_wrapper(key):
         nonlocal stop_flag
         if stop_flag:
             return False  # Stop the listener
-        return on_release(key, serial_input)
+        return on_release(key, serial_input,verbose)
 
     with Listener(on_press=on_press_wrapper, on_release=on_release_wrapper) as listener:
         listener.join()
