@@ -45,7 +45,27 @@ paused = False
 # Variable to keep track of the fullscreen state
 fullscreen = False 
 
+def yes_button():
+    global answer
+    answer = True
+def no_button():
+    global answer
+    answer = False
 
+def warning_popup():
+    answer = False
+    root = tk.Tk()
+    root.geometry("250x100")
+    
+    root.title("Warning Popup")
+    
+    btn1 = tk.Button(root, text = 'Yes', command=lambda:[yes_button(), root.destroy()]).pack(side = 'left', padx=20)
+    btn2 = tk.Button(root, text = 'No', command=lambda:[no_button(), root.destroy()]).pack(side = 'right', padx=20)
+
+    label = tk.Label(root, text ="Are you sure?").place(x=90, y=10)
+
+    root.mainloop()
+    return answer
 
 def getVideoInputDevice():
     """
@@ -98,16 +118,19 @@ def event_handler():
                     toggle_pause_mode() # Toggles pause state
                 
                 if event.ui_element == power_button:
-                    print("Host - Toggling power button...")
-                    serial_input.write(power_code.encode())
+                    if(warning_popup()):
+                        print("Host - Toggling power button...")
+                        serial_input.write(power_code.encode())
                 
                 if event.ui_element == kill_button:
-                    print("Host - Forcing shutdown...")
-                    serial_input.write(shutdown_code.encode())
+                    if(warning_popup()):
+                        print("Host - Forcing shutdown...")
+                        serial_input.write(shutdown_code.encode())
                 
                 if event.ui_element == exit_button:
-                    print("Disconnecting from Host...")
-                    running = False
+                    if(warning_popup()):
+                        print("Disconnecting from Host...")
+                        running = False
                 
                 if event.ui_element == fullscreen_button:
                     fullscreen = not fullscreen  # Toggle fullscreen state
