@@ -7,7 +7,7 @@ import time
 KEY_CODES = {   
 'alt': 2,
 'backspace': 4,
-'ctrl': 6, # Michael was here
+'ctrl': 6,
 'delete': 8,
 'down': 10,
 'end': 12,
@@ -153,22 +153,6 @@ MOUSE_CODES = {
     "1": 4  # Scroll Click
 }
 
-
-# Select Serial port (needs to be updated to auto find port)
-# ser1 = serial.Serial("/dev/ttyACM0",9600)
-
-def int_to_2sComp(num):
-    """
-    Converts a normal python number to 2 complement 
-    """
-    if num < -128:
-        return 0
-    elif num > 127:
-        return 255
-    elif num >= 0:
-        return num
-    return (1 << 8) + num
-
 def sendKeyboardMouseAction(in_type, key, mouseX, mouseY, serial_input):
     """
     This Function recives the type of input
@@ -190,6 +174,7 @@ def sendKeyboardMouseAction(in_type, key, mouseX, mouseY, serial_input):
             data_hex = "\x01" +  chr(key_code)
 
     elif (in_type == 'mousemove'): # Mouse Move
+        # Convert mouse value into serial sendable value
         data_hex = "\x02" + chr(min(max(100+int(round(mouseX/2,0)),0),144)) + chr(min(max(100+int(round(mouseY/2,0)),0),144))
 
     elif (in_type == 'mousedown' or in_type == 'mouseup'): # Mouse Buttons
@@ -199,7 +184,6 @@ def sendKeyboardMouseAction(in_type, key, mouseX, mouseY, serial_input):
         data_hex = "\x03" + chr(key_code)
 
     elif (in_type == 'mousescroll'): # Mouse Scroll
-        print(mouseX, mouseY)
         data_hex = "\x04" + chr(60 + mouseY)
 
     else:
