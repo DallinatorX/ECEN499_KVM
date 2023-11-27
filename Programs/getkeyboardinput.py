@@ -7,20 +7,29 @@ import serial
 current_keys = set()
 
 # Define functions for keypress and key release events
+
+# On Key Press
 def on_press(key, serial_input):
     if key not in current_keys:
         current_keys.add(key)
+        
         # Remove "Key." prefix and single quotes, if present
         key_str = str(key).replace("Key.", "").strip("'")
-        print(f"Key {key_str} pressed")
+        
+        if verbose:
+            print(f"Key {key_str} pressed")
+        
         sendKeyboardMouseAction('keydown',key_str,0,0,serial_input)
 
+# On key release
 def on_release(key, serial_input):
     if key in current_keys:
         current_keys.remove(key)
+
         # Remove "Key." prefix and single quotes, if present
         key_str = str(key).replace("Key.", "").strip("'")
-        print(f"Key {key_str} released")
+        if verbose:
+            print(f"Key {key_str} released")
         sendKeyboardMouseAction('keyup',key_str,0,0,serial_input)
         
 
