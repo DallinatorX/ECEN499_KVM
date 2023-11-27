@@ -1,25 +1,14 @@
 #include <Wire.h>   
 #include <Mouse.h>  
 #include <Keyboard.h>
-#include <KeyboardLayout.h>
-#include <Keyboard_da_DK.h>
-#include <Keyboard_de_DE.h> 
-#include <Keyboard_es_ES.h>
-#include <Keyboard_fr_FR.h>
-#include <Keyboard_it_IT.h>
-#include <Keyboard_sv_SE.h>
-
 
 byte key_array[200];
 uint8_t type_in, key_in, action;
-// int8_t mouse_x, mouse_y, recieved_data;
-signed char mouse_x, mouse_y, recieved_data;
+signed char mouse_x, mouse_y;
 
 void setup()
 {
-  // Debug LED
   pinMode(LED_BUILTIN, OUTPUT);
-  recieved_data = 0;
   
   // Set associated array for keypresses to their corresponding Hex for the HID to read.
   // https://www.arduino.cc/reference/en/language/functions/usb/keyboard/keyboardmodifiers/
@@ -120,6 +109,7 @@ void setup()
   Mouse.begin();
   Keyboard.begin();
 
+  //Connect to NUC
   Serial.begin(115200);
 
 
@@ -127,68 +117,49 @@ void setup()
   Wire.begin(9);             // join i2c bus with address #4
   Wire.setClock(400000); // Set I2C clock speed to 400kHz (adjust as needed)
 
+  //Set up I2C interupt
   Wire.onReceive(receiveEvent); // register event
 }
 
 
 void loop()
 {
-  // Allow for a little time to process between data inputs
+  // Run the action that was sent
   switch (action) {
     case 1: // Keyboard Key Pressed
-      if (recieved_data) {
-        Serial.print("Keyboard Key Pressed: ");
-        Serial.println(key_in);
-      }
       Keyboard.press(key_array[key_in]);
       break;
+
     case 2: // Keyboard Key Released
-      if (recieved_data) {
-        Serial.print("Keyboard Key Released: ");
-        Serial.println(key_in);
-      }
       Keyboard.release(key_array[key_in]);
       break;
+
     case 3: // Mouse Moved
-      if (recieved_data) {
-        Serial.print("Mouse Moved: ");
-        Serial.print(mouse_x);
-        Serial.print(", ");
-        Serial.println(mouse_y);
-      }
       Mouse.move(mouse_x, mouse_y, 0);
       break;
+
     case 4: // Mouse Click Pressed
       if (key_in > 1) { // Edge case for Left click
         key_in -= 1;
       }
-      if (recieved_data) {
-        Serial.print("Mouse Click Pressed: ");
-        Serial.println(key_in);
-      }
       Mouse.press(key_in);
       break;
+
     case 5: // Mouse Click Released
       if (key_in == 0) { // Edge case for Left click
           key_in += 1;
       }
-      if (recieved_data) {
-        Serial.print("Mouse Click Released: ");
-        Serial.println(key_in);
-      }
       Mouse.release(key_in);
       break;
+
     case 6: // Mouse Scroll
-      if (recieved_data) {
-        Serial.print("Mouse Scroll: ");
-        Serial.println(mouse_y);
-      }
       Mouse.move(0, 0, mouse_y);
       break;
     default:
       break;
   }
-  recieved_data = 0;
+
+  //Clear all values after use
   key_in = 0;
   mouse_x = 0;
   mouse_y = 0;
@@ -204,11 +175,8 @@ void receiveEvent(int howMany)
   {
     // Get Object Type
     action = 0;
-    char test = Wire.read();
 
-    type_in = static_cast<uint8_t>(test); // receive byte
-    recieved_data = 1;
-
+    type_in = static_cast<uint8_t>(Wire.read()); // receive byte
 
     // Keyboard Events
     if (type_in == 1) {
