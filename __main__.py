@@ -167,7 +167,8 @@ def mouse_logger(clock):
             # mouse movement
             if mouse_dx != 0 | mouse_dy != 0:
                 sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
-                print(mouse_dx,mouse_dy)
+                if verbose:
+                    print(mouse_dx,mouse_dy)
 
             # Center the mouse position
             pygame.mouse.set_pos(window_width // 2, window_height // 2)
@@ -175,16 +176,16 @@ def mouse_logger(clock):
             # Limit mouse pull rate to 60 FPS
             clock.tick(60)
 
-    def reset_arduino_watchdog():
-        data_hex = "\x06" + "a"
-        serial_input.write(data_hex.encode())
+def reset_arduino_watchdog():
+    data_hex = "\x06" + "a"
+    serial_input.write(data_hex.encode())
 
-    def keep_arduino_running():
-        while running:
-            reset_arduino_watchdog()
-            time.sleep(5)
-            
-            
+def keep_arduino_running():
+    while running:
+        reset_arduino_watchdog()
+        time.sleep(5)
+        
+        
 
 
 if __name__ == '__main__':
@@ -243,6 +244,7 @@ if __name__ == '__main__':
 	    # Read a frame from the video stream
         ret, frame = cap.read()
         if not ret:
+            print("Error: No Video")
             break
 
         # Rotate the frame 90 degrees clockwise
@@ -263,10 +265,7 @@ if __name__ == '__main__':
     	# Blit the frame to the Pygame window
         screen.blit(frame, (0, 0))
 
-        if not paused:
-            pass
-        else:
-        	
+        if paused:
             # Update the Pygame GUI manager
             manager.update(time_delta)
             # Draw the GUI manager
