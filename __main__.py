@@ -7,7 +7,6 @@ import subprocess
 import pygame
 from pygame.locals import *
 import tkinter as tk
-from tkinter import simpledialog
 from tkinter import *
 from tkinter.ttk import *
 import cv2
@@ -200,7 +199,7 @@ def mouse_logger(clock):
             pygame.mouse.set_pos(window_width // 2, window_height // 2)
 
             # Limit mouse pull rate to 60 FPS
-            clock.tick(60)
+            clock.tick(240)
 
 def reset_arduino_watchdog():
     data_hex = "\x06" + "a"
