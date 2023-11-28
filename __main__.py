@@ -8,6 +8,8 @@ import pygame
 from pygame.locals import *
 import tkinter as tk
 from tkinter import simpledialog
+from tkinter import *
+from tkinter.ttk import *
 import cv2
 import pygame_gui
 from libraries.sendPowerSwitch import *
