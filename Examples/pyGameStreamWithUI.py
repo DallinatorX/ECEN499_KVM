@@ -8,6 +8,8 @@ from tkinter import simpledialog
 from pygame.locals import *
 from tkinter import *
 from tkinter.ttk import *
+from datetime import datetime
+import sys
 
 # MACROS/PARAMETERS
 device = "video0"
@@ -22,6 +24,17 @@ def getVideoInputDevice():
     frames_loc = '/dev/' + str(device)
     return frames_loc
 
+def submit_feedback():
+    feedback_text = feedback_input.get_text()
+    if feedback_text:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open('user_feedback.txt', 'a') as file:
+            file.write(f"{timestamp}: {feedback_text}\n")
+        print("Feedback submitted successfully!")
+        feedback_input.hide()
+        submit_button.hide()
+        feedback_button.show()
+        feedback_input.set_text('')
 
 def yes_button():
     global answer
@@ -31,7 +44,6 @@ def no_button():
     answer = False
 
 def warning_popup():
-    answer = False
     root = Tk()
     root.geometry("250x100")
     
@@ -91,6 +103,14 @@ kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((560, 10), 
 exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((710, 10), (140, 50)),
                                             text='Disconnect', manager=manager)
         
+feedback_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((50, 100), (300, 100)),
+                                                      manager=manager)
+feedback_input.hide()
+
+submit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, 220), (100, 40)),
+                                             text='Submit',
+                                             manager=manager)
+submit_button.hide()
 
 
 while True:
@@ -133,16 +153,11 @@ while True:
                 else:
                     screen = pygame.display.set_mode((window_width, window_height))
             if event.ui_element == feedback_button:
-                # Open a dialog to get user feedback
-                root = tk.Tk()
-                root.withdraw()
-                feedback = simpledialog.askstring("Feedback", "Enter your feedback:")
-                
-                # Write feedback to a text file
-                if feedback:
-                    with open('user_feedback.txt', 'a') as file:
-                        file.write(feedback + '\n')    
-
+                    feedback_input.show()
+                    submit_button.show()
+            elif event.ui_element == submit_button:
+                    submit_feedback()
+                    paused = not paused
         manager.process_events(event)
 
     if not paused:
