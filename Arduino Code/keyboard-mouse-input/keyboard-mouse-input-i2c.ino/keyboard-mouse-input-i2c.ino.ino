@@ -173,7 +173,7 @@ void loop()
     if(power_command == 'k') // If k was sent then hold the power button for 10 seconds to kill the computer
     {
       digitalWrite(PowerPin, HIGH);  
-      delay(5000);
+      delay(10000);
       digitalWrite(PowerPin, LOW);
     }
     break;
@@ -236,9 +236,9 @@ void receiveEvent(int howMany)
       power_command = Wire.read();
       action = 7;
       }
-//    else if (type_in == 6){
-//        wdt_reset();
-//        Wire.read();
-//      };
+    else if (type_in == 6){ //Reset the watchdog timer
+        wdt_reset();
+        Wire.read(); //Clear the second bit
+      };
   }
 }

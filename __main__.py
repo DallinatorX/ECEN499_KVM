@@ -11,6 +11,7 @@ from tkinter import simpledialog
 import cv2
 import pygame_gui
 from libraries.sendPowerSwitch import *
+import time
 
 #Set Video device info
 device = "video0"
@@ -175,11 +176,14 @@ def mouse_logger(clock):
             clock.tick(60)
 
     def reset_arduino_watchdog():
-        pass
+        data_hex = "\x06" + "a"
+        serial_input.write(data_hex.encode())
 
     def keep_arduino_running():
         while running:
-            pass
+            reset_arduino_watchdog()
+            time.sleep(5)
+            
             
 
 
