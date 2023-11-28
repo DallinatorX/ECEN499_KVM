@@ -11,6 +11,7 @@ from tkinter import simpledialog
 import cv2
 import pygame_gui
 from libraries.sendPowerSwitch import *
+import time
 
 #Set Video device info
 device = "video0"
@@ -22,8 +23,8 @@ arduino_path = "/dev/ttyACM0"
 verbose = False
 
 # Set Screen size
-window_width = 1920
-window_height = 1080
+window_width = 1600
+window_height = 900
 screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
 
 
@@ -174,6 +175,18 @@ def mouse_logger(clock):
             # Limit mouse pull rate to 60 FPS
             clock.tick(60)
 
+    def reset_arduino_watchdog():
+        data_hex = "\x06" + "a"
+        serial_input.write(data_hex.encode())
+
+    def keep_arduino_running():
+        while running:
+            reset_arduino_watchdog()
+            time.sleep(5)
+            
+            
+
+
 if __name__ == '__main__':
     # Set the Serial input
     serial_input = serial.Serial(arduino_path,115200)
@@ -214,13 +227,15 @@ if __name__ == '__main__':
 
     # Create threads for each function
     keyboard_thread = threading.Thread(target=start_keyboard_input, args=(serial_input, verbose,))
-    mouse_thred = threading.Thread(target=mouse_logger,args=(clock,))
+    mouse_thread = threading.Thread(target=mouse_logger,args=(clock,))
     event_thread = threading.Thread(target=event_handler,)
+    arduino_thread = threading.Thread(target=keep_arduino_running,)
 
     # Start the threads
     keyboard_thread.start()
     event_thread.start()
-    mouse_thred.start()
+    mouse_thread.start()
+    arduino_thread.start()
 
     while running:
         time_delta = pygame.time.Clock().tick(60) / 1000.0
