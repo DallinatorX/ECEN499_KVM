@@ -174,6 +174,15 @@ def mouse_logger(clock):
             # Limit mouse pull rate to 60 FPS
             clock.tick(60)
 
+    def reset_arduino_watchdog():
+        pass
+
+    def keep_arduino_running():
+        while running:
+            pass
+            
+
+
 if __name__ == '__main__':
     # Set the Serial input
     serial_input = serial.Serial(arduino_path,115200)
