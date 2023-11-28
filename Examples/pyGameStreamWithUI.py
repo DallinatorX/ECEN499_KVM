@@ -44,7 +44,6 @@ def no_button():
     answer = False
 
 def warning_popup():
-    answer = False
     root = Tk()
     root.geometry("250x100")
     
