@@ -4,7 +4,6 @@ import pygame
 import pygame_gui
 import serial
 import tkinter as tk
-from tkinter import simpledialog
 from pygame.locals import *
 from tkinter import *
 from tkinter.ttk import *
