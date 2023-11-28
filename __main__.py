@@ -227,13 +227,15 @@ if __name__ == '__main__':
 
     # Create threads for each function
     keyboard_thread = threading.Thread(target=start_keyboard_input, args=(serial_input, verbose,))
-    mouse_thred = threading.Thread(target=mouse_logger,args=(clock,))
+    mouse_thread = threading.Thread(target=mouse_logger,args=(clock,))
     event_thread = threading.Thread(target=event_handler,)
+    arduino_thread = threading.Thread(target=keep_arduino_running,)
 
     # Start the threads
     keyboard_thread.start()
     event_thread.start()
-    mouse_thred.start()
+    mouse_thread.start()
+    arduino_thread.start()
 
     while running:
         time_delta = pygame.time.Clock().tick(60) / 1000.0
