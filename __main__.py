@@ -7,10 +7,12 @@ import subprocess
 import pygame
 from pygame.locals import *
 import tkinter as tk
-from tkinter import simpledialog
+from tkinter import *
+from tkinter.ttk import *
 import cv2
 import pygame_gui
 from libraries.sendPowerSwitch import *
+import time
 
 #Set Video device info
 device = "video0"
@@ -22,8 +24,8 @@ arduino_path = "/dev/ttyACM0"
 verbose = False
 
 # Set Screen size
-window_width = 1920
-window_height = 1080
+window_width = 1600
+window_height = 900
 screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
 
 
@@ -50,19 +52,30 @@ def no_button():
     answer = False
 
 def warning_popup():
-    answer = False
-    root = tk.Tk()
+    root = Tk()
     root.geometry("250x100")
     
     root.title("Warning Popup")
     
-    btn1 = tk.Button(root, text = 'Yes', command=lambda:[yes_button(), root.destroy()]).pack(side = 'left', padx=20)
-    btn2 = tk.Button(root, text = 'No', command=lambda:[no_button(), root.destroy()]).pack(side = 'right', padx=20)
+    btn1 = Button(root, text = 'Yes', command=lambda:[yes_button(), root.destroy()]).pack(side = 'left', padx=20)
+    btn2 = Button(root, text = 'No', command=lambda:[no_button(), root.destroy()]).pack(side = 'right', padx=20)
 
-    label = tk.Label(root, text ="Are you sure?").place(x=90, y=10)
+    label = Label(root, text ="Are you sure?").pack()
 
     root.mainloop()
     return answer
+
+def submit_feedback():
+    feedback_text = feedback_input.get_text()
+    if feedback_text:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open('user_feedback.txt', 'a') as file:
+            file.write(f"{timestamp}: {feedback_text}\n")
+        print("Feedback submitted successfully!")
+        feedback_input.hide()
+        submit_button.hide()
+        feedback_button.show()
+        feedback_input.set_text('')
 
 def getVideoInputDevice():
     """
@@ -117,16 +130,12 @@ def event_handler():
                 if event.ui_element == power_button:
                     if(warning_popup()):
                         print("Host - Toggling power button...")
-                        serial_input.write(power_code.encode())
+                        click_power_button(serial_input)
                 
                 if event.ui_element == kill_button:
                     if(warning_popup()):
-                        print("Host - Toggling power button...")
-                        click_power_button(serial_input)
-                    
-                if event.ui_element == kill_button:
-                    print("Host - Forcing shutdown...")
-                    hold_power_button(serial_input)
+                        print("Host - Forcing shutdown...")
+                        hold_power_button(serial_input)
                 
                 if event.ui_element == exit_button:
                     if(warning_popup()):
@@ -141,15 +150,11 @@ def event_handler():
                         screen = pygame.display.set_mode((window_width, window_height))
                 
                 if event.ui_element == feedback_button:
-                    # Open a dialog to get user feedback
-                    root = tk.Tk()
-                    root.withdraw()
-                    feedback = simpledialog.askstring("Feedback", "Enter your feedback:")
-                    
-                    # Write feedback to a text file
-                    if feedback:
-                        with open('user_feedback.txt', 'a') as file:
-                            file.write(feedback + '\n')   
+                    feedback_input.show()
+                    submit_button.show()
+                elif event.ui_element == submit_button:
+                    submit_feedback()
+                    paused = not paused      
 
             manager.process_events(event)
 
@@ -193,13 +198,26 @@ def mouse_logger(clock):
             # mouse movement
             if mouse_dx != 0 | mouse_dy != 0:
                 sendKeyboardMouseAction("mousemove",0,mouse_dx,mouse_dy,serial_input)
-                print(mouse_dx,mouse_dy)
+                if verbose:
+                    print(mouse_dx,mouse_dy)
 
             # Center the mouse position
             pygame.mouse.set_pos(window_width // 2, window_height // 2)
 
             # Limit mouse pull rate to 60 FPS
-            clock.tick(60)
+            clock.tick(240)
+
+def reset_arduino_watchdog():
+    data_hex = "\x06" + "a"
+    serial_input.write(data_hex.encode())
+
+def keep_arduino_running():
+    while running:
+        reset_arduino_watchdog()
+        time.sleep(5)
+        
+        
+
 
 if __name__ == '__main__':
     # Set the Serial input
@@ -235,19 +253,28 @@ if __name__ == '__main__':
                                                 text='Force Shutdown', manager=manager)                           
     exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((710, 10), (140, 50)),
                                                 text='Disconnect', manager=manager)
+    feedback_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((50, 100), (300, 100)),
+                                                      manager=manager)
+    feedback_input.hide()
+    submit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, 220), (100, 40)),
+                                             text='Submit',
+                                             manager=manager)
+    submit_button.hide()
 
     # Create a clock object to control the frame rate
     clock = pygame.time.Clock()
 
     # Create threads for each function
     keyboard_thread = threading.Thread(target=start_keyboard_input, args=(serial_input, verbose,))
-    mouse_thred = threading.Thread(target=mouse_logger,args=(clock,))
+    mouse_thread = threading.Thread(target=mouse_logger,args=(clock,))
     event_thread = threading.Thread(target=event_handler,)
+    arduino_thread = threading.Thread(target=keep_arduino_running,)
 
     # Start the threads
     keyboard_thread.start()
     event_thread.start()
-    mouse_thred.start()
+    mouse_thread.start()
+    arduino_thread.start()
 
     while running:
         time_delta = pygame.time.Clock().tick(60) / 1000.0
@@ -255,6 +282,7 @@ if __name__ == '__main__':
 	    # Read a frame from the video stream
         ret, frame = cap.read()
         if not ret:
+            print("Error: No Video")
             break
 
         # Rotate the frame 90 degrees clockwise
@@ -275,10 +303,7 @@ if __name__ == '__main__':
     	# Blit the frame to the Pygame window
         screen.blit(frame, (0, 0))
 
-        if not paused:
-            pass
-        else:
-        	
+        if paused:
             # Update the Pygame GUI manager
             manager.update(time_delta)
             # Draw the GUI manager

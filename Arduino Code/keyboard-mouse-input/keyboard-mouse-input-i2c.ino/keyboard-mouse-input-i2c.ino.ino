@@ -1,6 +1,7 @@
 #include <Wire.h>   
 #include <Mouse.h>  
 #include <Keyboard.h>
+#include <avr/wdt.h>
 
 byte key_array[200];
 uint8_t type_in, key_in, action, power_command;
@@ -123,6 +124,8 @@ void setup()
 
   //Set up I2C interupt
   Wire.onReceive(receiveEvent); // register event
+//  wdt_enable(WDTO_8S);
+
 }
 
 
@@ -170,7 +173,7 @@ void loop()
     if(power_command == 'k') // If k was sent then hold the power button for 10 seconds to kill the computer
     {
       digitalWrite(PowerPin, HIGH);  
-      delay(5000);
+      delay(10000);
       digitalWrite(PowerPin, LOW);
     }
     break;
@@ -210,8 +213,8 @@ void receiveEvent(int howMany)
     }
     // Mouse Move Events
     else if (type_in == 2) {
-        mouse_x = Wire.read()-100;
-        mouse_y = Wire.read()-100;
+        mouse_x = Wire.read()-72;
+        mouse_y = Wire.read()-72;
         action = 3;
     }
     // Mouse Click Events
@@ -233,5 +236,9 @@ void receiveEvent(int howMany)
       power_command = Wire.read();
       action = 7;
       }
+    else if (type_in == 6){ //Reset the watchdog timer
+        wdt_reset();
+        Wire.read(); //Clear the second bit
+      };
   }
 }
