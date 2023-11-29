@@ -65,7 +65,17 @@ def warning_popup():
     root.mainloop()
     return answer
 
-
+def submit_feedback():
+    feedback_text = feedback_input.get_text()
+    if feedback_text:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        with open('user_feedback.txt', 'a') as file:
+            file.write(f"{timestamp}: {feedback_text}\n")
+        print("Feedback submitted successfully!")
+        feedback_input.hide()
+        submit_button.hide()
+        feedback_button.show()
+        feedback_input.set_text('')
 
 def getVideoInputDevice():
     """
@@ -140,15 +150,11 @@ def event_handler():
                         screen = pygame.display.set_mode((window_width, window_height))
                 
                 if event.ui_element == feedback_button:
-                    # Open a dialog to get user feedback
-                    root = tk.Tk()
-                    root.withdraw()
-                    feedback = simpledialog.askstring("Feedback", "Enter your feedback:")
-                    
-                    # Write feedback to a text file
-                    if feedback:
-                        with open('user_feedback.txt', 'a') as file:
-                            file.write(feedback + '\n')   
+                    feedback_input.show()
+                    submit_button.show()
+                elif event.ui_element == submit_button:
+                    submit_feedback()
+                    paused = not paused      
 
             manager.process_events(event)
 
@@ -247,6 +253,13 @@ if __name__ == '__main__':
                                                 text='Force Shutdown', manager=manager)                           
     exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((710, 10), (140, 50)),
                                                 text='Disconnect', manager=manager)
+    feedback_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((50, 100), (300, 100)),
+                                                      manager=manager)
+    feedback_input.hide()
+    submit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((150, 220), (100, 40)),
+                                             text='Submit',
+                                             manager=manager)
+    submit_button.hide()
 
     # Create a clock object to control the frame rate
     clock = pygame.time.Clock()
