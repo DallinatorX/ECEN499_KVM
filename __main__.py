@@ -55,8 +55,8 @@ def warning_popup():
     
     root.title("Warning Popup")
     
-    btn1 = Button(root, text = 'Yes', command=lambda:[yes_button(), root.destroy()]).pack(side = 'left')
-    btn2 = Button(root, text = 'No', command=lambda:[no_button(), root.destroy()]).pack(side = 'right')
+    btn1 = Button(root, text = 'Yes', command=lambda:[yes_button(), root.destroy()]).pack(side = 'left', padx=20)
+    btn2 = Button(root, text = 'No', command=lambda:[no_button(), root.destroy()]).pack(side = 'right', padx=20)
 
     label = Label(root, text ="Are you sure?").pack()
 
