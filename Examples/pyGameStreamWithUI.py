@@ -61,8 +61,8 @@ def warning_popup():
 pygame.init()
 
 # Set the dimensions of the Pygame window
-window_width = 1920
-window_height = 1080
+window_width = 1600
+window_height = 900
 screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
 width = 1920
 height = 1080

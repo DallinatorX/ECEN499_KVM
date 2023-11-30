@@ -13,6 +13,8 @@ import cv2
 import pygame_gui
 from libraries.sendPowerSwitch import *
 import time
+from datetime import datetime
+
 
 #Set Video device info
 device = "video0"
@@ -27,10 +29,6 @@ verbose = False
 window_width = 1600
 window_height = 900
 screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
-
-
-
-
 
 # Mouse actions
 leftMouseDown = False
@@ -95,12 +93,23 @@ def toggle_pause_mode():
     else:
         pygame.mouse.set_visible(False) # Hide the mouse when not paused
 
+def toggle_fullscreen():
+    """
+    Toggles the fullscreen state of PyGame
+    """
+    global fullscreen, screen
+    time.sleep(1)
+    fullscreen = not fullscreen  # Toggle fullscreen state
+    if fullscreen:
+        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+    else:
+        screen = pygame.display.set_mode((window_width, window_height))
 
 def event_handler():
     """
     This thread handles all PyGame events 
     """
-    global leftMouseDown, rightMouseDown, wheelMouseDown, running, fullscreen
+    global leftMouseDown, rightMouseDown, wheelMouseDown, running, fullscreen, paused, screen
 
     while running:
         for event in pygame.event.get():
@@ -135,26 +144,24 @@ def event_handler():
                 if event.ui_element == kill_button:
                     if(warning_popup()):
                         print("Host - Forcing shutdown...")
-                        hold_power_button(serial_input)
-                
+                        hold_power_button(serial_input)         
+
+                if event.ui_element == fullscreen_button:
+                    print("Toggle fullscreen...")
+                    toggle_fullscreen()
+
                 if event.ui_element == exit_button:
                     if(warning_popup()):
                         print("Disconnecting from Host...")
                         running = False
                 
-                if event.ui_element == fullscreen_button:
-                    fullscreen = not fullscreen  # Toggle fullscreen state
-                    if fullscreen:
-                        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-                    else:
-                        screen = pygame.display.set_mode((window_width, window_height))
-                
                 if event.ui_element == feedback_button:
                     feedback_input.show()
                     submit_button.show()
-                elif event.ui_element == submit_button:
+
+                if event.ui_element == submit_button:
                     submit_feedback()
-                    paused = not paused      
+                    toggle_pause_mode() # Toggles pause state     
 
             manager.process_events(event)
 
@@ -216,7 +223,30 @@ def keep_arduino_running():
         reset_arduino_watchdog()
         time.sleep(5)
         
+def load_frame():
+    while running:
+        # Read a frame from the video stream
+        ret, frame = cap.read()
+        if not ret:
+            print("Error: No Video")
+            return 0
+
+        # Rotate the frame 90 degrees clockwise
+        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+        # # Flip the frame over the y axis
+        frame = cv2.flip(frame, 0)
+
+        # Resize the frame
+        frame = cv2.resize(frame, (window_height,window_width))
         
+        # Convert the frame to RGB (Pygame uses RGB format)
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        
+        # Convert the frame to Pygame surface
+        frame = pygame.surfarray.make_surface(frame)
+
+        # Blit the frame to the Pygame window
+        screen.blit(frame, (0, 0))
 
 
 if __name__ == '__main__':
@@ -224,7 +254,7 @@ if __name__ == '__main__':
     serial_input = serial.Serial(arduino_path,115200)
 
     # Set up PulseAudio in the OS to listen to the capture card
-    subprocess.call(['sh', './Programs/pulseAudio_config.sh'])
+    # subprocess.call(['sh', './Programs/pulseAudio_config.sh'])
 
 
     # Initialize Pygame
@@ -269,46 +299,25 @@ if __name__ == '__main__':
     mouse_thread = threading.Thread(target=mouse_logger,args=(clock,))
     event_thread = threading.Thread(target=event_handler,)
     arduino_thread = threading.Thread(target=keep_arduino_running,)
+    video_thread = threading.Thread(target= load_frame,)
 
     # Start the threads
     keyboard_thread.start()
     event_thread.start()
     mouse_thread.start()
     arduino_thread.start()
+    video_thread.start()
 
     while running:
+        
         time_delta = pygame.time.Clock().tick(60) / 1000.0
-
-	    # Read a frame from the video stream
-        ret, frame = cap.read()
-        if not ret:
-            print("Error: No Video")
-            break
-
-        # Rotate the frame 90 degrees clockwise
-        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        # Flip the frame over the y axis
-        frame = cv2.flip(frame, 0)
-
-    	# Resize the frame
-        frame = cv2.resize(frame, (window_height,window_width) )
-        
-        
-        # Convert the frame to RGB (Pygame uses RGB format)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        
-        # Convert the frame to Pygame surface
-        frame = pygame.surfarray.make_surface(frame)
-
-    	# Blit the frame to the Pygame window
-        screen.blit(frame, (0, 0))
 
         if paused:
             # Update the Pygame GUI manager
             manager.update(time_delta)
             # Draw the GUI manager
             manager.draw_ui(screen)
-
+        
         pygame.display.flip()
     
     cap.release()
