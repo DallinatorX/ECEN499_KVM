@@ -56,6 +56,31 @@ def warning_popup():
     root.mainloop()
     return answer
 
+def load_frame():
+    # Read a frame from the video stream
+    ret, frame = cap.read()
+    if not ret:
+        print("Error: No Video")
+        return 0
+
+    # Rotate the frame 90 degrees clockwise
+    frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
+    # # Flip the frame over the y axis
+    frame = cv2.flip(frame, 0)
+
+    # Resize the frame
+    frame = cv2.resize(frame, (window_height,window_width))
+    
+    # Convert the frame to RGB (Pygame uses RGB format)
+    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    
+    # Convert the frame to Pygame surface
+    frame = pygame.surfarray.make_surface(frame)
+
+    # Blit the frame to the Pygame window
+    screen.blit(frame, (0, 0))
+
+
 
 # Initialize Pygame
 pygame.init()
@@ -159,28 +184,10 @@ while True:
                     paused = not paused
         manager.process_events(event)
 
+
     if not paused:
         # Read a frame from the video stream
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        # Rotate the frame 90 degrees clockwise
-        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        # Flip the frame over the y axis
-        frame = cv2.flip(frame, 0)
-
-        # Resize the frame to double the size
-        #frame = cv2.resize(frame, (frame.shape[1] * 2, frame.shape[0] * 2))
-
-        # Convert the frame to RGB (Pygame uses RGB format)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        # Convert the frame to Pygame surface
-        frame = pygame.surfarray.make_surface(frame)
-
-        # Blit the frame to the Pygame window
-        screen.blit(frame, (0, 0))
+        load_frame()
     else:
         # Update the Pygame GUI manager
         manager.update(time_delta)

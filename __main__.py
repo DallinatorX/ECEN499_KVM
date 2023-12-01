@@ -20,27 +20,24 @@ from datetime import datetime
 device = "video0"
 
 #Set the arduino path
-arduino_path = "/dev/ttyACM0"
+arduino_path = "/dev/ttyACM1"
 
 # Turn on Verbose
 verbose = False
 
 # Set Screen size
-window_width = 1600
-window_height = 900
-screen = pygame.display.set_mode((window_width, window_height), pygame.RESIZABLE)
+window_width = 1920
+window_height = 1080
 
 # Mouse actions
 leftMouseDown = False
 rightMouseDown = False
 wheelMouseDown = False
+
+# Booleans
 running = True
-
-# Variable to keep track of the pause state
-paused = False  
-
-# Variable to keep track of the fullscreen state
-fullscreen = False 
+paused = False      # Variable to keep track of the pause state
+fullscreen = False  # Variable to keep track of the fullscreen state
 
 def yes_button():
     global answer
@@ -93,18 +90,6 @@ def toggle_pause_mode():
     else:
         pygame.mouse.set_visible(False) # Hide the mouse when not paused
 
-def toggle_fullscreen():
-    """
-    Toggles the fullscreen state of PyGame
-    """
-    global fullscreen, screen
-    time.sleep(1)
-    fullscreen = not fullscreen  # Toggle fullscreen state
-    if fullscreen:
-        screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-    else:
-        screen = pygame.display.set_mode((window_width, window_height))
-
 def event_handler():
     """
     This thread handles all PyGame events 
@@ -116,8 +101,7 @@ def event_handler():
             # Exit all functions if Pygame is quit
             if event.type == QUIT:
                 pygame.quit()
-                sys.exit()
-                keyboard_thread.join()
+                cap.release()
 
             # Start Pause menu if alt+u is pressed    
             elif event.type == KEYDOWN:
@@ -125,7 +109,7 @@ def event_handler():
                     toggle_pause_mode() # Toggles pause state
 
             elif event.type == MOUSEWHEEL:
-                #Recored mouse scroll
+                #Record mouse scroll
                 print(event.x,event.y)
                 sendKeyboardMouseAction("mousescroll",0,event.x, event.y, serial_input)
 
@@ -139,21 +123,20 @@ def event_handler():
                 if event.ui_element == power_button:
                     if(warning_popup()):
                         print("Host - Toggling power button...")
-                        click_power_button(serial_input)
+                        click_power_button(serial_input) # Serial to arduino to "toggle" power btn 
                 
                 if event.ui_element == kill_button:
                     if(warning_popup()):
                         print("Host - Forcing shutdown...")
-                        hold_power_button(serial_input)         
-
-                if event.ui_element == fullscreen_button:
-                    print("Toggle fullscreen...")
-                    toggle_fullscreen()
+                        hold_power_button(serial_input) # Serial to arduino to "hold" power btn   
 
                 if event.ui_element == exit_button:
                     if(warning_popup()):
                         print("Disconnecting from Host...")
                         running = False
+                        pygame.quit()
+                        cap.release()
+                        
                 
                 if event.ui_element == feedback_button:
                     feedback_input.show()
@@ -175,7 +158,7 @@ def mouse_logger(clock):
 
         if not paused:
 
-            mouse_dx, mouse_dy = pygame.mouse.get_rel() #Get mouse posistion
+            mouse_dx, mouse_dy = pygame.mouse.get_rel() # Get mouse position
             mouse_left, mouse_wheel, mouse_right = pygame.mouse.get_pressed() # Get mouse buttons pressed
 
             # check each button to see if the current state is different from the previous state
@@ -215,38 +198,30 @@ def mouse_logger(clock):
             clock.tick(240)
 
 def reset_arduino_watchdog():
+    """ Send reset code to the arduino """
     data_hex = "\x06" + "a"
     serial_input.write(data_hex.encode())
 
 def keep_arduino_running():
+    """ Reset the arduino to keep the program running """
     while running:
         reset_arduino_watchdog()
         time.sleep(5)
         
 def load_frame():
     while running:
-        # Read a frame from the video stream
+    # Read a frame from the video stream
         ret, frame = cap.read()
         if not ret:
             print("Error: No Video")
             return 0
 
-        # Rotate the frame 90 degrees clockwise
-        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)
-        # # Flip the frame over the y axis
-        frame = cv2.flip(frame, 0)
-
-        # Resize the frame
-        frame = cv2.resize(frame, (window_height,window_width))
-        
-        # Convert the frame to RGB (Pygame uses RGB format)
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        
-        # Convert the frame to Pygame surface
-        frame = pygame.surfarray.make_surface(frame)
-
-        # Blit the frame to the Pygame window
-        screen.blit(frame, (0, 0))
+        frame = cv2.rotate(frame, cv2.ROTATE_90_COUNTERCLOCKWISE)   # Rotate the frame 90 degrees clockwise
+        frame = cv2.flip(frame, 0)                                  # Flip the frame over the y axis
+        frame = cv2.resize(frame, (window_height,window_width))     # Resize the frame
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)              # Convert the frame to RGB (Pygame uses RGB format)
+        frame = pygame.surfarray.make_surface(frame)                # Convert the frame to Pygame surface
+        screen.blit(frame, (0, 0))                                  # Blit the frame to the Pygame window
 
 
 if __name__ == '__main__':
@@ -254,12 +229,11 @@ if __name__ == '__main__':
     serial_input = serial.Serial(arduino_path,115200)
 
     # Set up PulseAudio in the OS to listen to the capture card
-    # subprocess.call(['sh', './Programs/pulseAudio_config.sh'])
-
+    subprocess.call(['sh', './Programs/pulseAudio_config.sh'])
 
     # Initialize Pygame
     pygame.init()
-    screen = pygame.display.set_mode((window_width, window_height))
+    screen = pygame.display.set_mode((window_width, window_height), pygame.FULLSCREEN)
     pygame.mouse.set_visible(False)
 
     # Initialize OpenCV for video capture
@@ -273,15 +247,13 @@ if __name__ == '__main__':
     # Create pygame gui buttons
     resume_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((10, 10), (100, 50)),
                                                 text='Resume', manager=manager)
-    fullscreen_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((120, 10), (120, 50)),
-                                                    text='Fullscreen', manager=manager)
-    feedback_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((250, 10), (150, 50)),
+    feedback_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((120, 10), (150, 50)),
                                                 text='Submit Feedback', manager=manager)
-    power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((410, 10), (140, 50)), 
+    power_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((280, 10), (140, 50)), 
                                                 text='Power On/Off', manager=manager)
-    kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((560, 10), (140, 50)), 
+    kill_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((430, 10), (140, 50)), 
                                                 text='Force Shutdown', manager=manager)                           
-    exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((710, 10), (140, 50)),
+    exit_button = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((580, 10), (140, 50)),
                                                 text='Disconnect', manager=manager)
     feedback_input = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((50, 100), (300, 100)),
                                                       manager=manager)
@@ -303,22 +275,20 @@ if __name__ == '__main__':
 
     # Start the threads
     keyboard_thread.start()
-    event_thread.start()
     mouse_thread.start()
+    event_thread.start()
     arduino_thread.start()
     video_thread.start()
 
     while running:
         
+        # Cap the video framerate to 60 FPS - Change .tick(<number>)
         time_delta = pygame.time.Clock().tick(60) / 1000.0
 
         if paused:
             # Update the Pygame GUI manager
             manager.update(time_delta)
-            # Draw the GUI manager
+            # Draw the GUI managers
             manager.draw_ui(screen)
         
         pygame.display.flip()
-    
-    cap.release()
-    pygame.quit()
