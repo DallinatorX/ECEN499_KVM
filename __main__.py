@@ -208,10 +208,18 @@ def mouse_logger(clock):
             clock.tick(240)
 
 def reset_arduino_watchdog():
+    """
+    This sends a signal to the arduino telling it reset its watchdog timmer
+    """
     data_hex = "\x06" + "a"
     serial_input.write(data_hex.encode())
 
 def keep_arduino_running():
+    """
+    This runs as a thred and resets the watchdog timer every
+    5 seconds. The timer is set to reset the arduino every 8.
+    So if compumcaion is ever lost the arduino will restart
+    """
     while running:
         reset_arduino_watchdog()
         time.sleep(5)
@@ -220,6 +228,10 @@ def keep_arduino_running():
 
 
 if __name__ == '__main__':
+    """
+    This is the main function for the KVM. 
+    This will open many threds to complete this task
+    """
     # Set the Serial input
     serial_input = serial.Serial(arduino_path,115200)
 
