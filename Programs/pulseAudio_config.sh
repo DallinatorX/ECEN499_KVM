@@ -17,6 +17,3 @@ pactl set-default-source alsa_input.usb-ASUS_CU4K30_UVC_UHD_Video_902B0011129010
 echo "--------MONITORING AUDIO DEVICE--------"
 # load loopback to monitor audio from capture card
 pactl load-module module-loopback
-# launch sunshine
-echo "--------LAUNCHING SUNSHINE--------"
-gnome-terminal -x sunshine
